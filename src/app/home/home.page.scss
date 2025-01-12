@@ -1,27 +1,54 @@
-#container {
-  text-align: center;
+.container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+}
 
+.container ion-button {
+  position: relative;
+  height: 30vh;
+  width:85vw;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  .btn-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn-inner > img {
+    height: auto;
+    width: 65%;
+  }
+  .btn-inner > img.diaper {
+    height: 60%;
+    width:60%;
+  }
+  .btn-inner > img.sleep {
+    margin-bottom: 20px;
+  }
+  &:last-child {
+    margin-bottom: 60px;
+  }
+}
+
+.footer {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 0.5rem;
+  right: 0.5rem;
+  ion-icon {
+    padding: 0.5rem;
+    font-size: 40px;
+  }
 }
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
+.dots-container > div.dot{
+  width: 15px;
+  height: 15px;
 }

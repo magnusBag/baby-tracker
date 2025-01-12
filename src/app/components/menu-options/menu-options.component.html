@@ -1,0 +1,20 @@
+<div class="flex">
+  <ion-title>Menus</ion-title>
+  <ion-button fill="clear" (click)="close.emit()">
+    <ion-icon name="close"></ion-icon>
+  </ion-button>
+</div>
+<div class="flex-column ion-padding">
+  <ion-text (click)="close.emit()" fill="outline" routerLink="/calendar">
+    daily overview
+  </ion-text>
+  <ion-text (click)="close.emit()" fill="outline" routerLink="/settings">
+    settings
+  </ion-text>
+  <ion-text (click)="close.emit()" fill="outline" routerLink="/history">
+    history
+  </ion-text>
+  <ion-text (click)="close.emit()" fill="outline" routerLink="/timer">
+    timer
+  </ion-text>
+</div>

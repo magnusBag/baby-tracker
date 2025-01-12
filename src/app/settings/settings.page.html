@@ -1,0 +1,40 @@
+<ion-content [fullscreen]="true">
+  <div
+    style="display: flex; align-items: center; justify-content: space-between"
+  >
+    <ion-button fill="clear" (click)="goBack()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-button>
+    <ion-title size="large">Settings</ion-title>
+  </div>
+  <div class="active-baby-wrapper ion-padding">
+    @for (baby of babyService.babies(); track baby.id) {
+    <ion-list>
+      <ion-item>
+        <ion-text>{{ baby.name }}</ion-text>
+        <ion-buttons slot="end">
+          <ion-button color="danger" (click)="openDeleteBabyAlert(baby)">
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-button>
+          <ion-button (click)="openBabyAlert(baby)">
+            <ion-icon slot="icon-only" name="pencil"></ion-icon>
+          </ion-button>
+          <ion-button (click)="babyService.setActiveBaby(baby)">
+            @if (baby.id === babyService.activeBaby()?.id) {
+            <ion-icon slot="icon-only" name="star"></ion-icon>
+            } @else {
+            <ion-icon slot="icon-only" name="star-outline"></ion-icon>
+            }
+          </ion-button>
+        </ion-buttons>
+      </ion-item>
+    </ion-list>
+    }
+    <div class="flex-column">
+      <ion-button (click)="openBabyAlert()">
+        <ion-icon name="add"></ion-icon>
+        <ion-text>add baby</ion-text>
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

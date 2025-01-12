@@ -1,0 +1,33 @@
+export type DiaperInput = {
+    type: DiaperType;
+    time: Date;
+    note?: string;
+    id?: string;
+    babyId?: string;
+};
+
+export type SleepInput = {
+    start: Date;
+    end: Date;
+    id?: string;
+    babyId?: string;
+};
+
+export type DiaperType = "wet" | "solid" | "both";
+
+export type NursingType = "right" | "left" | "both";
+
+export type NursingInput = {
+    type: NursingType;
+    amount: "a little" | "medium" | "a lot";
+    time: Date;
+    note?: string;
+    id?: string;
+    babyId?: string;
+};
+
+export type Baby = {
+    name: string;
+    id: string;
+    active?: boolean;
+};

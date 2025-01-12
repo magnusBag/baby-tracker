@@ -1,20 +1,119 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-menu #menu contentId="main-content">
+  <app-menu-options #menuOptions (close)="menu.close()"></app-menu-options>
+</ion-menu>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+<ion-content fullscreen="true">
+  <div class="container">
+    <ion-button
+      fill="clear"
+      id="open-diaper-modal"
+      (longPress)="onLongPressDiaper()"
+    >
+      <div class="btn-inner">
+        <div class="dots-container">
+          @for (diaper of storageService.totalDiapersToday(); track diaper) {
+          <div class="dot" [class]="diaper.type"></div>
+          }
+        </div>
+        <img
+          [src]="darkModeService.isDarkMode() ? 'assets/diaper-dark.svg' : 'assets/diaper.svg'"
+          alt="diaper"
+          class="diaper"
+        />
+      </div>
+    </ion-button>
+    <ion-button fill="clear" id="open-modal" (longPress)="onLongPressSleep()">
+      <div class="btn-inner">
+        <div class="dots-container">
+          @for (dot of storageService.sleepArrayFromTotalHoursSlept(); track
+          dot) {
+          <div class="dot" [class]="dot"></div>
+          }
+        </div>
+        <img
+          [src]="darkModeService.isDarkMode() ? 'assets/sleep-dark.svg' : 'assets/sleep.svg'"
+          alt="sleep"
+          class="sleep"
+        />
+      </div>
+    </ion-button>
+    <ion-button
+      fill="clear"
+      (longPress)="onLongPressNursing()"
+      id="open-nursing-modal"
+    >
+      <div class="btn-inner">
+        <div class="dots-container">
+          @for (dot of storageService.totalNursingsToday(); track dot) {
+          <div
+            class="dot"
+            [class.left]="dot.type === 'left'"
+            [class.right]="dot.type === 'right'"
+            [class.full]="dot.type === 'both'"
+          ></div>
+          }
+        </div>
+        <img
+          [src]="darkModeService.isDarkMode() ? 'assets/nursing-dark.svg' : 'assets/nursing.svg'"
+          alt="nursing"
+        />
+      </div>
+    </ion-button>
   </div>
+  <div class="footer" id="main-content">
+    <ion-buttons>
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+  </div>
+
+  <!-- modals -->
+  <ion-modal
+    #sleepModal
+    trigger="open-modal"
+    [breakpoints]="[0, 0.5, 0.75, 1]"
+    [initialBreakpoint]="0.5"
+    [keepContentsMounted]="true"
+    (willPresent)="resetSleepModal()"
+  >
+    <ng-template>
+      <ion-content class="ion-padding">
+        <app-sleep-form
+          #sleepForm
+          (sleepOutput)="onSleepOutput($event)"
+        ></app-sleep-form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    #diaperModal
+    trigger="open-diaper-modal"
+    [breakpoints]="[0, 0.5, 0.75, 1]"
+    [initialBreakpoint]="0.5"
+    [keepContentsMounted]="true"
+    (willPresent)="resetDiaperModal()"
+  >
+    <ng-template>
+      <app-diaper-form
+        #diaperForm
+        (diaperOutput)="onDiaperOutput($event)"
+      ></app-diaper-form>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    #nursingModal
+    trigger="open-nursing-modal"
+    [breakpoints]="[0, 0.5, 0.75, 1]"
+    [initialBreakpoint]="0.5"
+    [keepContentsMounted]="true"
+    (willPresent)="resetNursingModal()"
+  >
+    <ng-template>
+      <app-nursing-form
+        #nursingForm
+        (nursingOutput)="onNursingOutput($event)"
+      ></app-nursing-form>
+    </ng-template>
+  </ion-modal>
 </ion-content>
