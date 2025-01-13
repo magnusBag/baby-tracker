@@ -39,7 +39,7 @@ interface TimeSlot {
           </ion-button>
         </ion-buttons>
         <ion-title>{{ currentDate | date:'dd/MM/yyyy':'':'da-DK' }}</ion-title>
-        <ion-title size="small">Sleep: {{ storageService.totalHoursSlept() | number:'1.0-1' }} hours</ion-title>
+        <ion-title size="small">Sleep: {{ storageService.totalHoursSlept() | number:'1.0-1' }} hours - Diapers: {{ storageService.totalDiapersToday().length }} - Nursing: {{ storageService.totalNursingsToday().length }}</ion-title>
       </ion-toolbar>
 
     <ion-content class="ion-padding">

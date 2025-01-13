@@ -19,6 +19,9 @@
           <ion-button (click)="openBabyAlert(baby)">
             <ion-icon slot="icon-only" name="pencil"></ion-icon>
           </ion-button>
+          <ion-button (click)="makeMailToBaby(baby)">
+            <ion-icon slot="icon-only" name="share-social"></ion-icon>
+          </ion-button>
           <ion-button (click)="babyService.setActiveBaby(baby)">
             @if (baby.id === babyService.activeBaby()?.id) {
             <ion-icon slot="icon-only" name="star"></ion-icon>
@@ -30,10 +33,15 @@
       </ion-item>
     </ion-list>
     }
-    <div class="flex-column">
-      <ion-button (click)="openBabyAlert()">
+    <div class="flex">
+      <ion-button expand="block" (click)="openBabyAlert()">
         <ion-icon name="add"></ion-icon>
         <ion-text>add baby</ion-text>
+      </ion-button>
+      <!-- add baby by id -->
+      <ion-button expand="block" (click)="openAddBabyByIdAlert()">
+        <ion-icon name="add"></ion-icon>
+        <ion-text>add baby by id</ion-text>
       </ion-button>
     </div>
   </div>

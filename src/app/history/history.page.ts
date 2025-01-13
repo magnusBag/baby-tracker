@@ -17,7 +17,7 @@ import {
   ViewWillEnter,
 } from "@ionic/angular/standalone";
 import { StorageService } from "../services/storage.service";
-import { DiaperInput } from "../components/models";
+import { DiaperInput, NursingInput } from "../components/models";
 import { SleepInput } from "../components/models";
 import { arrowBackOutline, trashOutline } from "ionicons/icons";
 import { Router } from "@angular/router";
@@ -47,13 +47,10 @@ import { BabyService } from "../services/baby.service";
   ],
 })
 export class HistoryPage implements ViewWillEnter {
-  private storageService = inject(StorageService);
+  storageService = inject(StorageService);
   private alertController = inject(AlertController);
   private router = inject(Router);
   babyService = inject(BabyService);
-
-  diapers = this.storageService.diapers;
-  sleeps = this.storageService.sleeps;
 
   constructor() {
     addIcons({ arrowBackOutline, trashOutline });
@@ -96,6 +93,24 @@ export class HistoryPage implements ViewWillEnter {
   async deleteSleep(sleep: SleepInput) {
     if (sleep.id) {
       await this.storageService.deleteSleep(sleep.id);
+    }
+  }
+
+  async showDeleteNursingAlert(nursing: NursingInput) {
+    const alert = await this.alertController.create({
+      header: "Delete Nursing",
+      message: "Are you sure you want to delete this nursing?",
+      buttons: ["Cancel", {
+        text: "Delete",
+        handler: () => this.deleteNursing(nursing),
+      }],
+    });
+    await alert.present();
+  }
+
+  async deleteNursing(nursing: NursingInput) {
+    if (nursing.id) {
+      await this.storageService.deleteNursing(nursing.id);
     }
   }
 

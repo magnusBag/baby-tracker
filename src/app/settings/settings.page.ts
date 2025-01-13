@@ -1,8 +1,11 @@
 import { BabyService } from "./../services/baby.service";
+import { DarkModeService } from "./../services/dark-mode.service";
 import { Component, inject, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
+import { EmailComposer } from "capacitor-email-composer";
+
 import {
   AlertController,
   IonButton,
@@ -14,6 +17,7 @@ import {
   IonList,
   IonText,
   IonTitle,
+  IonToggle,
   IonToolbar,
   ViewWillEnter,
 } from "@ionic/angular/standalone";
@@ -23,6 +27,10 @@ import {
   arrowBackOutline,
   pencil,
   radioButtonOn,
+  share,
+  shareOutline,
+  shareSocial,
+  shareSocialOutline,
   star,
   starOutline,
   trash,
@@ -46,10 +54,12 @@ import { addIcons } from "ionicons";
     IonButtons,
     IonList,
     IonItem,
+    IonToggle,
   ],
 })
 export class SettingsPage implements ViewWillEnter {
   babyService = inject(BabyService);
+  darkModeService = inject(DarkModeService);
   activeBaby = signal<Baby | null>(null);
   alertController = inject(AlertController);
   router = inject(Router);
@@ -58,9 +68,12 @@ export class SettingsPage implements ViewWillEnter {
       arrowBackOutline,
       trash,
       pencil,
+      shareSocial,
       star,
       starOutline,
       add,
+      shareSocialOutline,
+      share,
       radioButtonOn,
     });
   }
@@ -122,5 +135,29 @@ export class SettingsPage implements ViewWillEnter {
       ],
     });
     await alert.present();
+  }
+
+  async openAddBabyByIdAlert() {
+    const alert = await this.alertController.create({
+      header: "Add baby by id",
+      inputs: [{ name: "id", type: "text", placeholder: "Baby id" }],
+      buttons: [
+        {
+          text: "Add",
+          handler: (data) => this.babyService.addBabyById(data.id),
+        },
+        { text: "Cancel", role: "cancel" },
+      ],
+    });
+    await alert.present();
+  }
+
+  makeMailToBaby(baby: Baby) {
+    EmailComposer.open({
+      subject: "Baby Tracker - Add baby to your account",
+      body:
+        `To add ${baby.name} to your account, copy the id and add the baby in the settings page. <br> Baby ID: ${baby.id}`,
+      isHtml: true,
+    });
   }
 }

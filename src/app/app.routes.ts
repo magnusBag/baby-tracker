@@ -29,4 +29,15 @@ export const routes: Routes = [
     loadComponent: () =>
       import("./calendar/calendar.page").then((m) => m.CalendarPage),
   },
+  {
+    path: "baby/:id",
+    loadComponent: () =>
+      import("./baby-add-parent/baby-add-parent.page").then((m) =>
+        m.BabyAddParentPage
+      ),
+  },
+  {
+    path: "**",
+    redirectTo: "home",
+  },
 ];

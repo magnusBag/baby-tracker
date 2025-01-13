@@ -70,6 +70,16 @@ export class BabyService {
             throw error;
         }
     }
+    async addBabyById(id: string) {
+        const response = await CapacitorHttp.post({
+            url: `${this.apiUrl}/baby/${id}/parent`,
+            headers: await this.headers(),
+            data: { babyId: id },
+        });
+        console.log("Baby", response.data);
+        this.refresh();
+        return response.data;
+    }
 
     async setActiveBaby(baby: Baby) {
         Preferences.set({ key: "activeBaby", value: JSON.stringify(baby) });

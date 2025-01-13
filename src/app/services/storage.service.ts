@@ -103,7 +103,7 @@ export class StorageService {
             headers: await this.babyService.headers(),
         });
         //calculate total hours slept from the response.sleeps
-        const totalHoursSlept = response.data.sleeps.reduce(
+        const totalHoursSlept = response.data.reduce(
             (acc: number, sleep: SleepInput) => {
                 return acc +
                     (new Date(sleep.end).getTime() -
