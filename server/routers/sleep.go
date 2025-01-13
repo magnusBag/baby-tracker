@@ -105,6 +105,22 @@ func SetupSleepRoutes(api *gin.RouterGroup) {
 			}
 			c.JSON(http.StatusOK, gin.H{"success": true})
 		})
+
+		sleep.PUT("/:id", checkBabyAccess(), func(c *gin.Context) {
+			id := c.Param("id")
+			var sleep models.Sleep
+			if err := c.ShouldBindJSON(&sleep); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			sleep.ID = id
+			if err := database.DB.Save(&sleep).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, sleep)
+		})
+
 		sleep.GET("/:id/date/:year/:month/:day", checkBabyAccess(), func(c *gin.Context) {
 			//get total hours slept in a day
 			year := c.Param("year")

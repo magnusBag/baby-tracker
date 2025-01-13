@@ -62,5 +62,19 @@ func SetupNursingRoutes(api *gin.RouterGroup) {
 			}
 			c.JSON(http.StatusOK, gin.H{"success": true})
 		})
+		nursing.PUT("/:id", checkBabyAccess(), func(c *gin.Context) {
+			id := c.Param("id")
+			var nursing models.Nursing
+			if err := c.ShouldBindJSON(&nursing); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			nursing.ID = id
+			if err := database.DB.Save(&nursing).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, nursing)
+		})
 	}
 }

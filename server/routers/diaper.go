@@ -78,5 +78,20 @@ func SetupDiaperRoutes(api *gin.RouterGroup) {
 			}
 			c.JSON(http.StatusOK, diapers)
 		})
+
+		diaper.PUT("/:id", checkBabyAccess(), func(c *gin.Context) {
+			id := c.Param("id")
+			var diaper models.Diaper
+			if err := c.ShouldBindJSON(&diaper); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			diaper.ID = id
+			if err := database.DB.Save(&diaper).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, diaper)
+		})
 	}
 }
