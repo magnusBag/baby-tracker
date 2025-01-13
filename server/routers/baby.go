@@ -81,5 +81,30 @@ func SetupBabyRoutes(api *gin.RouterGroup) {
 
 			c.JSON(http.StatusOK, baby)
 		})
+		//add parent to baby
+		baby.POST("/:id/parent", checkBabyAccess(), func(c *gin.Context) {
+			id := c.Param("id")
+			userID := c.GetHeader("X-Parrent-User-ID")
+			if userID == "" {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not provided"})
+				return
+			}
+			var baby models.Baby
+			if err := database.DB.First(&baby, "id = ?", id).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
+				return
+			}
+			var user models.User
+			if err := database.DB.First(&user, "id = ?", userID).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+				return
+			}
+			baby.Parents = append(baby.Parents, user)
+			if err := database.DB.Save(&baby).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, baby)
+		})
 	}
 }
