@@ -93,8 +93,8 @@ func getWeeklyReport(c *gin.Context, babyID string, endDate time.Time) {
 		// Calculate total sleep hours for the day
 		var dailySleepHours float64
 		for _, sleep := range sleeps {
-			sleepStart := sleep.Start.Add(1 * time.Hour)
-			sleepEnd := sleep.End.Add(-1 * time.Hour)
+			sleepStart := sleep.Start
+			sleepEnd := sleep.End
 			if sleepStart.Before(d) {
 				sleepStart = d
 			}
