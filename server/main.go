@@ -26,6 +26,9 @@ func main() {
 
 		c.Next()
 	})
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "alive"})
+	})
 
 	api := r.Group("/api")
 	{
@@ -35,9 +38,6 @@ func main() {
 		routers.SetupBabyRoutes(api)
 		routers.SetupReportRoutes(api)
 		routers.SetupNursingRoutes(api)
-		api.GET("/alive", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "I'm"})
-		})
 	}
 
 	r.Run(":3000")
