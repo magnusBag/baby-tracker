@@ -3,6 +3,7 @@ package main
 import (
 	"baby-tracker/database"
 	"baby-tracker/routers"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,6 +35,9 @@ func main() {
 		routers.SetupBabyRoutes(api)
 		routers.SetupReportRoutes(api)
 		routers.SetupNursingRoutes(api)
+		api.GET("/alive", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"message": "I'm"})
+		})
 	}
 
 	r.Run(":3000")
