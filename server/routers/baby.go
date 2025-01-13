@@ -82,28 +82,40 @@ func SetupBabyRoutes(api *gin.RouterGroup) {
 			c.JSON(http.StatusOK, baby)
 		})
 		//add parent to baby
-		baby.POST("/:id/parent", checkBabyAccess(), func(c *gin.Context) {
+		baby.POST("/:id/parent", func(c *gin.Context) {
 			id := c.Param("id")
 			userID := c.GetHeader("X-Parrent-User-ID")
 			if userID == "" {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not provided"})
 				return
 			}
+
+			var parentToAdd models.User
+			if err := database.DB.First(&parentToAdd, "id = ?", userID).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Parent user not found"})
+				return
+			}
+
 			var baby models.Baby
-			if err := database.DB.First(&baby, "id = ?", id).Error; err != nil {
+			if err := database.DB.Preload("Parents").First(&baby, "id = ?", id).Error; err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
 				return
 			}
-			var user models.User
-			if err := database.DB.First(&user, "id = ?", userID).Error; err != nil {
-				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-				return
+
+			// Check if parent is already added
+			for _, existingParent := range baby.Parents {
+				if existingParent.ID == parentToAdd.ID {
+					c.JSON(http.StatusBadRequest, gin.H{"error": "Parent already added to this baby"})
+					return
+				}
 			}
-			baby.Parents = append(baby.Parents, user)
+
+			baby.Parents = append(baby.Parents, parentToAdd)
 			if err := database.DB.Save(&baby).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
+
 			c.JSON(http.StatusOK, baby)
 		})
 	}
