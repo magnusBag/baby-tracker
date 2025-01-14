@@ -11,6 +11,16 @@ export const routes: Routes = [
     pathMatch: "full",
   },
   {
+    path: "calendar",
+    loadComponent: () =>
+      import("./calendar/calendar.page").then((m) => m.CalendarPage),
+  },
+  {
+    path: "settings",
+    loadComponent: () =>
+      import("./settings/settings.page").then((m) => m.SettingsPage),
+  },
+  {
     path: "history",
     loadComponent: () =>
       import("./history/history.page").then((m) => m.HistoryPage),
@@ -20,24 +30,10 @@ export const routes: Routes = [
     loadComponent: () => import("./timer/timer.page").then((m) => m.TimerPage),
   },
   {
-    path: "settings",
+    path: "weekly-report",
     loadComponent: () =>
-      import("./settings/settings.page").then((m) => m.SettingsPage),
-  },
-  {
-    path: "calendar",
-    loadComponent: () =>
-      import("./calendar/calendar.page").then((m) => m.CalendarPage),
-  },
-  {
-    path: "baby/:id",
-    loadComponent: () =>
-      import("./baby-add-parent/baby-add-parent.page").then((m) =>
-        m.BabyAddParentPage
+      import("./weekly-report/weekly-report.page").then((m) =>
+        m.WeeklyReportPage
       ),
-  },
-  {
-    path: "**",
-    redirectTo: "home",
   },
 ];

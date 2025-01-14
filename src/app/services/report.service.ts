@@ -14,6 +14,7 @@ export interface DailyReport {
         id: string;
         time: string;
         type: string;
+        amount: string;
     }>;
     sleeps: Array<{
         id: string;
@@ -21,6 +22,22 @@ export interface DailyReport {
         end: string;
     }>;
     totalHoursSlept: number;
+}
+
+export interface DailySummary {
+    date: string;
+    totalHoursSlept: number;
+    diaperCount: number;
+    nursingCount: number;
+}
+
+export interface WeeklyReport {
+    startDate: string;
+    endDate: string;
+    dailySummaries: DailySummary[];
+    avgSleepHours: number;
+    avgDiapersPerDay: number;
+    avgNursingsPerDay: number;
 }
 
 @Injectable({
@@ -42,6 +59,21 @@ export class ReportService {
         const queryParams = date ? `?date=${date}` : "";
         const response = await CapacitorHttp.get({
             url: `${this.apiUrl}/report/${activeBaby.id}${queryParams}`,
+            headers: await this.babyService.headers(),
+        });
+
+        return response.data;
+    }
+
+    async getWeeklyReport(endDate?: string): Promise<WeeklyReport> {
+        const activeBaby = this.babyService.activeBaby();
+        if (!activeBaby) {
+            throw new Error("No active baby selected");
+        }
+
+        const queryParams = endDate ? `?endDate=${endDate}` : "";
+        const response = await CapacitorHttp.get({
+            url: `${this.apiUrl}/report/${activeBaby.id}/weekly${queryParams}`,
             headers: await this.babyService.headers(),
         });
 

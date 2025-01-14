@@ -1,4 +1,4 @@
-import { Component, inject, signal } from "@angular/core";
+import { Component, inject, signal, viewChild } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router } from "@angular/router";
 import { DailyReport, ReportService } from "../services/report.service";
@@ -7,8 +7,10 @@ import {
     IonButtons,
     IonContent,
     IonIcon,
+    IonModal,
     IonTitle,
     IonToolbar,
+    ModalController,
     ViewWillEnter,
 } from "@ionic/angular/standalone";
 import { addIcons } from "ionicons";
@@ -16,6 +18,12 @@ import { arrowBackOutline } from "ionicons/icons";
 import { registerLocaleData } from "@angular/common";
 import localeDa from "@angular/common/locales/da";
 import { StorageService } from "../services/storage.service";
+import { DiaperType, NursingInput, NursingType } from "../components/models";
+import { SleepInput } from "../components/models";
+import { DiaperInput } from "../components/models";
+import { DiaperFormComponent } from "../components/diaper-form/diaper-form.component";
+import { NursingFormComponent } from "../components/nursing-form/nursing-form.component";
+import { SleepFormComponent } from "../components/sleep-form/sleep-form.component";
 
 registerLocaleData(localeDa);
 
@@ -25,6 +33,9 @@ interface TimeSlot {
     activities: {
         type: "sleep" | "diaper" | "nursing";
         text: string;
+        diaper?: DiaperInput;
+        nursing?: NursingInput;
+        sleep?: SleepInput;
     }[];
     isSleeping: boolean;
 }
@@ -52,7 +63,7 @@ interface TimeSlot {
               </div>
               <div class="activities">
                 @for (activity of slot.activities; track activity.text) {
-                  <div class="activity {{ activity.type }}">
+                  <div class="activity {{ activity.type }}" (click)="onActivityClick(activity)">
                     {{ activity.text }}
                   </div>
                 }
@@ -64,6 +75,31 @@ interface TimeSlot {
         <p>Loading...</p>
       }
     </ion-content>
+
+    <!-- Edit Modals -->
+    <ion-modal #sleepModal [breakpoints]="[0, 0.5, 0.75, 1]" [initialBreakpoint]="0.5" [keepContentsMounted]="true">
+      <ng-template>
+        <ion-content class="ion-padding">
+          <app-sleep-form #sleepForm (sleepOutput)="onSleepEdit($event)"></app-sleep-form>
+        </ion-content>
+      </ng-template>
+    </ion-modal>
+
+    <ion-modal #diaperModal [breakpoints]="[0, 0.5, 0.75, 1]" [initialBreakpoint]="0.5" [keepContentsMounted]="true">
+      <ng-template>
+        <ion-content class="ion-padding">
+          <app-diaper-form #diaperForm (diaperOutput)="onDiaperEdit($event)"></app-diaper-form>
+        </ion-content>
+      </ng-template>
+    </ion-modal>
+
+    <ion-modal #nursingModal [breakpoints]="[0, 0.5, 0.75, 1]" [initialBreakpoint]="0.5" [keepContentsMounted]="true">
+      <ng-template>
+        <ion-content class="ion-padding">
+          <app-nursing-form #nursingForm (nursingOutput)="onNursingEdit($event)"></app-nursing-form>
+        </ion-content>
+      </ng-template>
+    </ion-modal>
 
     <style>
       .calendar-container {
@@ -102,6 +138,12 @@ interface TimeSlot {
         margin: 2px 0;
         border-radius: 4px;
         font-size: 14px;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+      }
+
+      .activity:hover {
+        opacity: 0.8;
       }
 
       .activity.sleep {
@@ -129,15 +171,29 @@ interface TimeSlot {
         IonButtons,
         IonButton,
         IonIcon,
+        IonModal,
+        DiaperFormComponent,
+        NursingFormComponent,
+        SleepFormComponent,
     ],
 })
 export class CalendarPage implements ViewWillEnter {
     private reportService = inject(ReportService);
     storageService = inject(StorageService);
     private router = inject(Router);
+    private modalController = inject(ModalController);
     report = signal<DailyReport | null>(null);
     currentDate = new Date();
     timeSlots: TimeSlot[] = [];
+
+    sleepModal = viewChild<IonModal>("sleepModal");
+    diaperModal = viewChild<IonModal>("diaperModal");
+    nursingModal = viewChild<IonModal>("nursingModal");
+    sleepForm = viewChild<SleepFormComponent>("sleepForm");
+    diaperForm = viewChild<DiaperFormComponent>("diaperForm");
+    nursingForm = viewChild<NursingFormComponent>("nursingForm");
+
+    selectedActivity: TimeSlot["activities"][0] | null = null;
 
     constructor() {
         addIcons({ arrowBackOutline });
@@ -178,6 +234,11 @@ export class CalendarPage implements ViewWillEnter {
                     } - ${endTime.getHours()}.${
                         endTime.getMinutes().toString().padStart(2, "0")
                     }`,
+                    sleep: {
+                        start: new Date(sleep.start),
+                        end: new Date(sleep.end),
+                        id: sleep.id,
+                    },
                 });
             }
 
@@ -199,6 +260,11 @@ export class CalendarPage implements ViewWillEnter {
                 slot.activities.push({
                     type: "diaper",
                     text: `Diaper: ${diaper.type}`,
+                    diaper: {
+                        id: diaper.id,
+                        type: diaper.type as DiaperType,
+                        time: new Date(diaper.time),
+                    },
                 });
             }
         });
@@ -212,6 +278,15 @@ export class CalendarPage implements ViewWillEnter {
                 slot.activities.push({
                     type: "nursing",
                     text: `Nursing: ${nursing.type}`,
+                    nursing: {
+                        id: nursing.id,
+                        type: nursing.type as NursingType,
+                        time: new Date(nursing.time),
+                        amount: nursing.amount as
+                            | "a little"
+                            | "medium"
+                            | "a lot",
+                    },
                 });
             }
         });
@@ -232,5 +307,96 @@ export class CalendarPage implements ViewWillEnter {
 
     goBack() {
         this.router.navigate(["/home"]);
+    }
+
+    async onActivityClick(activity: TimeSlot["activities"][0]) {
+        this.selectedActivity = activity;
+
+        switch (activity.type) {
+            case "sleep":
+                if (activity.sleep) {
+                    await this.sleepForm()?.reset();
+                    // Pre-fill the form with existing data
+                    // handle timezones
+                    const start = new Date(activity.sleep.start);
+                    const end = new Date(activity.sleep.end);
+                    start.setMinutes(
+                        start.getMinutes() - start.getTimezoneOffset(),
+                    );
+                    end.setMinutes(end.getMinutes() - end.getTimezoneOffset());
+                    this.sleepForm()!.sleepStart.set(start);
+                    this.sleepForm()!.sleepEnd.set(end);
+                    await this.sleepModal()?.present();
+                }
+                break;
+            case "diaper":
+                if (activity.diaper) {
+                    await this.diaperForm()?.reset();
+                    // Pre-fill the form
+                    this.diaperForm()!.form.patchValue({
+                        type: activity.diaper.type,
+                    });
+                    // handle timezones
+                    const time = new Date(activity.diaper.time);
+                    time.setMinutes(
+                        time.getMinutes() - time.getTimezoneOffset(),
+                    );
+                    this.diaperForm()!.time.set(time);
+                    await this.diaperModal()?.present();
+                }
+                break;
+            case "nursing":
+                if (activity.nursing) {
+                    await this.nursingForm()?.reset();
+                    // Pre-fill the nursing signal
+                    const time = new Date(activity.nursing.time);
+                    time.setMinutes(
+                        time.getMinutes() - time.getTimezoneOffset(),
+                    );
+                    this.nursingForm()!.nursing.set({
+                        type: activity.nursing.type,
+                        time: time,
+                        amount: activity.nursing.amount,
+                    });
+                    await this.nursingModal()?.present();
+                }
+                break;
+        }
+    }
+
+    async onSleepEdit(event: SleepInput | undefined) {
+        if (event && this.selectedActivity?.sleep?.id) {
+            event.id = this.selectedActivity.sleep.id;
+
+            await this.storageService.editSleep(event);
+            await this.refreshData();
+        }
+        await this.sleepModal()?.dismiss();
+    }
+
+    async onDiaperEdit(event: DiaperInput | undefined) {
+        if (event && this.selectedActivity?.diaper?.id) {
+            event.id = this.selectedActivity.diaper.id;
+            await this.storageService.editDiaper(event);
+            await this.refreshData();
+        }
+        await this.diaperModal()?.dismiss();
+    }
+
+    async onNursingEdit(event: NursingInput | undefined) {
+        if (event && this.selectedActivity?.nursing?.id) {
+            event.id = this.selectedActivity.nursing.id;
+            await this.storageService.editNursing(event);
+            await this.refreshData();
+        }
+        await this.nursingModal()?.dismiss();
+    }
+
+    async refreshData() {
+        const report = await this.reportService.getDailyReport();
+        this.report.set(report);
+        if (report) {
+            this.updateActivities(report);
+        }
     }
 }

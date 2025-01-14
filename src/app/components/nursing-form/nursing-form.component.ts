@@ -1,15 +1,17 @@
 import { Component, inject, output, signal, viewChild } from "@angular/core";
-import { NursingInput, NursingType } from "../models";
+import { NursingAmount, NursingInput, NursingType } from "../models";
 import {
     IonButton,
     IonDatetime,
     IonDatetimeButton,
     IonIcon,
+    IonInput,
     IonItem,
     IonLabel,
     IonModal,
     IonSegment,
     IonSegmentButton,
+    IonTextarea,
 } from "@ionic/angular/standalone";
 import { StorageService } from "src/app/services/storage.service";
 import { addTimezoneOffset, now } from "../util";
@@ -22,35 +24,61 @@ import {
     waterOutline,
 } from "ionicons/icons";
 import { BabiesListComponent } from "../babies-list/babies-list.component";
+import {
+    FormControl,
+    FormGroup,
+    ReactiveFormsModule,
+    Validators,
+} from "@angular/forms";
 
 @Component({
     selector: "app-nursing-form",
+    imports: [
+        ReactiveFormsModule,
+        IonItem,
+        IonLabel,
+        IonSegment,
+        IonSegmentButton,
+        IonButton,
+        IonTextarea,
+        IonInput,
+        IonModal,
+        IonDatetime,
+        BabiesListComponent,
+    ],
     template: `
-    <div class="ion-padding">
+    <form [formGroup]="form" class="ion-padding">
         <ion-item>
             <ion-label>Nursing Time</ion-label>
-            <ion-datetime-button datetime="nursing-time"></ion-datetime-button>
+            <ion-input
+                type="tel"
+                inputmode="numeric"
+                formControlName="time"
+                (ionInput)="formatTime($event)"
+                (ionFocus)="clearTime()"
+                placeholder="HH:mm"
+                maxlength="5"
+            ></ion-input>
         </ion-item>
-        <ion-item>
-            <ion-segment [value]="nursing().type" (ionChange)="onTypeChange($event)" class="ion-padding-top">
-                <ion-segment-button value="left">
-                    <div class="dot left"></div>
-                    <ion-label>Left</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="right">
-                    <div class="dot right"></div>
-                    <ion-label>Right</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="both">
-                    <div class="dot solid"></div>
-                    <ion-label>Both</ion-label>
-                </ion-segment-button>
-            </ion-segment>
-        </ion-item>
-        <ion-item>
-            <ion-segment [value]="nursing().amount" (ionChange)="onAmountChange($event)" class="ion-padding-top">
-                <ion-segment-button value="a little">
-                <svg class="droplet empty" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100">
+
+        <ion-segment formControlName="type" class="ion-padding-top">
+            <ion-segment-button value="left">
+                <div class="dot half"></div>
+                <ion-label>Left</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="right">
+                <div class="dot half"></div>
+                <ion-label>Right</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="both">
+                <div class="dot full"></div>
+                <ion-label>Both</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+
+        <ion-segment formControlName="amount" class="ion-padding-top">
+            <ion-segment-button value="a little">
+            <svg class="droplet empty" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100">
                     <path d="M49.015,0.803
                     c-0.133-1.071-1.896-1.071-2.029,0
                     C42.57,36.344,20,43.666,20,68.367   
@@ -67,10 +95,10 @@ import { BabiesListComponent } from "../babies-list/babies-list.component";
                     c0.516-0.856,1.903-0.82,2.533,0.029
                     C44.781,39.116,44.879,39.619,44.751,40.09z"/>
                 </svg>
-                    <ion-label>A little</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="medium">
-                    <svg class="droplet half" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100">
+                <ion-label>A little</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="medium">
+            <svg class="droplet half" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100">
                     <path d="M49.015,0.803
                     c-0.133-1.071-1.896-1.071-2.029,0
                     C42.57,36.344,20,43.666,20,68.367   
@@ -87,10 +115,10 @@ import { BabiesListComponent } from "../babies-list/babies-list.component";
                     c0.516-0.856,1.903-0.82,2.533,0.029
                     C44.781,39.116,44.879,39.619,44.751,40.09z"/>
                 </svg>
-                    <ion-label>Medium</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="a lot">
-                    <svg class="droplet full"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100">
+                <ion-label>Medium</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="a lot">
+            <svg class="droplet full"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100">
                     <path d="M49.015,0.803
                     c-0.133-1.071-1.896-1.071-2.029,0
                     C42.57,36.344,20,43.666,20,68.367   
@@ -107,16 +135,22 @@ import { BabiesListComponent } from "../babies-list/babies-list.component";
                     c0.516-0.856,1.903-0.82,2.533,0.029
                     C44.781,39.116,44.879,39.619,44.751,40.09z"/>
                 </svg>
-                    <ion-label>A lot</ion-label>
-                </ion-segment-button>
-            </ion-segment>
-        </ion-item>
+                <ion-label>A lot</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+
+        <ion-textarea 
+            fill="outline" 
+            (ionInput)="onNoteChange($event)" 
+            placeholder="Note"
+        ></ion-textarea>
+
         <div class="button-container" style="margin-top: 1rem;">
             <ion-button class="form-button" (click)="saveNursing()">Save Nursing</ion-button>
             <ion-button class="form-button" (click)="cancelNursing()">Cancel</ion-button>
         </div>
         <app-babies-list></app-babies-list>
-    </div>
+    </form>
 
     <ion-modal [keepContentsMounted]="true">
     <ng-template>
@@ -129,18 +163,6 @@ import { BabiesListComponent } from "../babies-list/babies-list.component";
     </ng-template>
   </ion-modal>
     `,
-    imports: [
-        IonItem,
-        IonLabel,
-        IonSegment,
-        IonSegmentButton,
-        IonIcon,
-        IonModal,
-        IonDatetime,
-        IonDatetimeButton,
-        IonButton,
-        BabiesListComponent,
-    ],
     standalone: true,
     styles: [`
         .dot {
@@ -163,6 +185,11 @@ import { BabiesListComponent } from "../babies-list/babies-list.component";
             fill: var(--ion-color-primary);
             fill-opacity: 0.2;
         }
+        ion-input {
+            width: 80px;
+            --padding-start: 8px;
+            --padding-end: 8px;
+        }
     `],
 })
 export class NursingFormComponent {
@@ -183,7 +210,7 @@ export class NursingFormComponent {
     });
     time = signal<Date>(now());
     nursingOutput = output<NursingInput | undefined>();
-
+    id = signal<string | undefined>(undefined);
     reset() {
         this.babiesList()?.refresh();
         this.nursing.set({
@@ -192,6 +219,13 @@ export class NursingFormComponent {
             time: now(),
         });
         this.time.set(now());
+        this.id.set(undefined);
+        this.form.patchValue({
+            time: now().toISOString().slice(11, 16),
+            type: "both",
+            amount: "medium",
+            note: "",
+        });
     }
 
     onTypeChange(event: any) {
@@ -217,14 +251,87 @@ export class NursingFormComponent {
     }
 
     saveNursing() {
-        this.nursingOutput.emit({
-            ...this.nursing(),
-            time: this.time(),
-            babyId: this.babiesList()?.choosenBaby()?.id,
-        });
+        if (this.form.valid) {
+            const now = new Date();
+            const [hours, minutes] = this.form.value.time!.split(":").map(
+                Number,
+            );
+
+            now.setHours(hours);
+            now.setMinutes(minutes);
+
+            this.nursingOutput.emit({
+                type: this.form.value.type!,
+                amount: this.form.value.amount as NursingAmount,
+                time: now,
+                note: this.form.value.note || undefined,
+                babyId: this.babiesList()?.choosenBaby()?.id,
+                id: this.id(),
+            });
+        }
     }
 
     cancelNursing() {
         this.nursingOutput.emit(undefined);
+    }
+
+    initializeForm(
+        nursing: { time: Date; type: string; amount: string; id?: string },
+    ) {
+        const nursingTime = new Date(nursing.time);
+        this.form.patchValue({
+            time: `${nursingTime.getHours().toString().padStart(2, "0")}:${
+                nursingTime.getMinutes().toString().padStart(2, "0")
+            }`,
+            type: nursing.type as NursingType,
+            amount: nursing.amount,
+        });
+        this.id.set(nursing.id);
+    }
+
+    formatTime(event: any) {
+        let value = event.detail.value.replace(/\D/g, ""); // Remove non-digits
+
+        if (value.length > 4) {
+            value = value.slice(0, 4);
+        }
+
+        if (value.length >= 2) {
+            const hours = parseInt(value.slice(0, 2));
+            if (hours > 23) {
+                value = "23" + value.slice(2);
+            }
+        }
+
+        if (value.length >= 4) {
+            const minutes = parseInt(value.slice(2, 4));
+            if (minutes > 59) {
+                value = value.slice(0, 2) + "59";
+            }
+        }
+
+        if (value.length >= 3) {
+            value = value.slice(0, 2) + ":" + value.slice(2);
+        }
+
+        this.form.get("time")?.setValue(value, { emitEvent: false });
+    }
+
+    clearTime() {
+        this.form.get("time")?.setValue("", { emitEvent: false });
+    }
+
+    form = new FormGroup({
+        type: new FormControl<NursingType>("both"),
+        amount: new FormControl("medium"),
+        time: new FormControl("", [
+            Validators.required,
+            Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+        ]),
+        note: new FormControl(""),
+    });
+
+    onNoteChange(event: any) {
+        this.form.get("note")?.setValue(event.detail.value);
     }
 }

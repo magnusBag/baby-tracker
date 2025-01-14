@@ -5,6 +5,7 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
 import { EmailComposer } from "capacitor-email-composer";
+import { Preferences } from "@capacitor/preferences";
 
 import {
   AlertController,
@@ -63,6 +64,7 @@ export class SettingsPage implements ViewWillEnter {
   activeBaby = signal<Baby | null>(null);
   alertController = inject(AlertController);
   router = inject(Router);
+  startOnHistory = signal(false);
   constructor() {
     addIcons({
       arrowBackOutline,
@@ -78,9 +80,11 @@ export class SettingsPage implements ViewWillEnter {
     });
   }
 
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     console.log("ionViewWillEnter");
     this.babyService.refresh();
+    const { value } = await Preferences.get({ key: "startOnHistory" });
+    this.startOnHistory.set(value === "true");
   }
 
   async openBabyAlert(baby?: Baby) {
@@ -159,5 +163,14 @@ export class SettingsPage implements ViewWillEnter {
         `To add ${baby.name} to your account, copy the id and add the baby in the settings page. <br> Baby ID: ${baby.id}`,
       isHtml: true,
     });
+  }
+
+  async toggleStartOnHistory(event: any) {
+    const isChecked = event.detail.checked;
+    await Preferences.set({
+      key: "startOnHistory",
+      value: isChecked.toString(),
+    });
+    this.startOnHistory.set(isChecked);
   }
 }

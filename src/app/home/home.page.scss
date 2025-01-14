@@ -25,11 +25,12 @@
   }
   .btn-inner > img {
     height: auto;
-    width: 65%;
+    width: 60%;
   }
-  .btn-inner > img.diaper {
+  .btn-inner > img.diaper,
+  .btn-inner > img.nursing {
     height: 60%;
-    width:60%;
+    width: 55%;
   }
   .btn-inner > img.sleep {
     margin-bottom: 20px;

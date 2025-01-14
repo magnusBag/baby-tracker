@@ -35,26 +35,28 @@ type WeeklyReport struct {
 
 func getDailyReport(c *gin.Context, babyID string, date time.Time) {
 	// Get start and end of the day
-	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	// go from 01:00 to 01:00
+	cet, _ := time.LoadLocation("Europe/Paris")
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 1, 0, 0, 0, cet)
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
 	var diapers []models.Diaper
 	if err := database.DB.Where("baby_id = ? AND time >= ? AND time < ?",
-		babyID, startOfDay, endOfDay).Find(&diapers).Error; err != nil {
+		babyID, startOfDay, endOfDay).Order("time").Find(&diapers).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	var nursings []models.Nursing
 	if err := database.DB.Where("baby_id = ? AND time >= ? AND time < ?",
-		babyID, startOfDay, endOfDay).Find(&nursings).Error; err != nil {
+		babyID, startOfDay, endOfDay).Order("time").Find(&nursings).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	var sleeps []models.Sleep
-	if err := database.DB.Where("baby_id = ? AND (start < ? AND \"end\" > ? OR start BETWEEN ? AND ? OR \"end\" BETWEEN ? AND ?)",
-		babyID, endOfDay, startOfDay, startOfDay, endOfDay, startOfDay, endOfDay).Find(&sleeps).Error; err != nil {
+	if err := database.DB.Where("baby_id = ? AND start >= ? AND start < ?",
+		babyID, startOfDay.Add(-1*time.Hour), startOfDay.Add(23*time.Hour)).Order("start").Find(&sleeps).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -251,4 +253,3 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 		})
 	}
 }
-

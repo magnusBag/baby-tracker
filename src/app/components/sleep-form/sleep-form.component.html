@@ -18,24 +18,27 @@
     <app-babies-list></app-babies-list>
   </form>
 
+  @if (sleepStart()) {
   <ion-modal [keepContentsMounted]="true">
     <ng-template>
       <ion-datetime
         locale="da-DK"
         id="datetime-start"
-        [value]="sleepStart().toISOString()"
+        [value]="sleepStart()?.toISOString()"
         (ionChange)="onSleepStartChange($event)"
       ></ion-datetime>
     </ng-template>
   </ion-modal>
+  } @if (sleepEnd()) {
   <ion-modal [keepContentsMounted]="true">
     <ng-template>
       <ion-datetime
         locale="da-DK"
         id="datetime-end"
-        [value]="sleepEnd().toISOString()"
+        [value]="sleepEnd()?.toISOString()"
         (ionChange)="onSleepEndChange($event)"
       ></ion-datetime>
     </ng-template>
   </ion-modal>
+  }
 </ion-content>

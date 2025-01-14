@@ -21,7 +21,12 @@ export class BabyService {
             }
         });
     }
-
+    async getActiveBaby() {
+        const result = await Preferences.get({ key: "activeBaby" });
+        if (result.value) {
+            this.activeBaby.set(JSON.parse(result.value));
+        }
+    }
     async headers() {
         const deviceID = await Device.getId();
         return {

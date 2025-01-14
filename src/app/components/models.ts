@@ -17,9 +17,11 @@ export type DiaperType = "wet" | "solid" | "both";
 
 export type NursingType = "right" | "left" | "both";
 
+export type NursingAmount = "a little" | "medium" | "a lot";
+
 export type NursingInput = {
     type: NursingType;
-    amount: "a little" | "medium" | "a lot";
+    amount: NursingAmount;
     time: Date;
     note?: string;
     id?: string;

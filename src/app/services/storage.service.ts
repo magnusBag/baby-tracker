@@ -194,6 +194,48 @@ export class StorageService {
         }
     }
 
+    async editSleep(sleep: SleepInput) {
+        try {
+            await CapacitorHttp.put({
+                url: `${this.apiUrl}/sleep/${sleep.id}`,
+                headers: await this.headers(),
+                data: sleep,
+            });
+            await this.refresh();
+        } catch (error) {
+            await this.showToast("Failed to edit sleep record");
+            throw error;
+        }
+    }
+
+    async editDiaper(diaper: DiaperInput) {
+        try {
+            await CapacitorHttp.put({
+                url: `${this.apiUrl}/diaper/${diaper.id}`,
+                headers: await this.headers(),
+                data: diaper,
+            });
+            await this.refresh();
+        } catch (error) {
+            await this.showToast("Failed to edit diaper record");
+            throw error;
+        }
+    }
+
+    async editNursing(nursing: NursingInput) {
+        try {
+            await CapacitorHttp.put({
+                url: `${this.apiUrl}/nursing/${nursing.id}`,
+                headers: await this.headers(),
+                data: nursing,
+            });
+            await this.refresh();
+        } catch (error) {
+            await this.showToast("Failed to edit nursing record");
+            throw error;
+        }
+    }
+
     async deleteDiaper(diaperId: string) {
         try {
             await CapacitorHttp.delete({
@@ -204,6 +246,7 @@ export class StorageService {
             this.diapers.update((diapers) =>
                 diapers.filter((diaper) => diaper.id !== diaperId)
             );
+            await this.refresh();
         } catch (error) {
             await this.showToast("Failed to delete diaper record");
             throw error;
