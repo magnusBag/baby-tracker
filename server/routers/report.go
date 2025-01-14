@@ -71,8 +71,8 @@ func getDailyReport(c *gin.Context, babyID string, date time.Time) {
 
 func getWeeklyReport(c *gin.Context, babyID string, endDate time.Time) {
 	startDate := endDate.AddDate(0, 0, -6) // 7 days including end date
-	startOfFirstDay := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, startDate.Location())
-	endOfLastDay := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 999999999, endDate.Location())
+	startOfFirstDay := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 23, 0, 0, 0, startDate.Location())
+	endOfLastDay := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 0, 0, 0, endDate.Location())
 
 	var dailySummaries []DailySummary
 	var totalSleepHours float64
@@ -80,7 +80,7 @@ func getWeeklyReport(c *gin.Context, babyID string, endDate time.Time) {
 
 	// Calculate summaries for each day
 	for d := startOfFirstDay; d.Before(endOfLastDay.Add(time.Second)); d = d.AddDate(0, 0, 1) {
-		dayEnd := d.Add(24 * time.Hour)
+		dayEnd := d.AddDate(0, 0, 1) // Next day at 23:00
 
 		// Get sleeps for the day
 		var sleeps []models.Sleep
@@ -238,5 +238,17 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 
 			getWeeklyReport(c, babyID, endDate)
 		})
+		// get history for specific date
+		report.GET("/:id/history/:date", checkBabyAccess(), func(c *gin.Context) {
+			babyID := c.Param("id")
+			dateStr := c.Param("date")
+			date, err := time.Parse("2006-01-02", dateStr)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Use YYYY-MM-DD"})
+				return
+			}
+			getDailyReport(c, babyID, date)
+		})
 	}
 }
+
