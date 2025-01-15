@@ -75,6 +75,7 @@ func getWeeklyReport(c *gin.Context, babyID string, endDate time.Time) {
 	startDate := endDate.AddDate(0, 0, -6) // 7 days including end date
 	startOfFirstDay := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 23, 0, 0, 0, startDate.Location())
 	endOfLastDay := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 0, 0, 0, endDate.Location())
+	currentDay := time.Now().Truncate(24 * time.Hour)
 
 	var dailySummaries []DailySummary
 	var totalSleepHours float64
@@ -130,18 +131,20 @@ func getWeeklyReport(c *gin.Context, babyID string, endDate time.Time) {
 		}
 		dailySummaries = append(dailySummaries, summary)
 
-		// Update totals for averages
-		if dailySleepHours > 0 {
-			totalSleepHours += dailySleepHours
-			daysWithSleep++
-		}
-		if len(diapers) > 0 {
-			totalDiapers += len(diapers)
-			daysWithDiapers++
-		}
-		if len(nursings) > 0 {
-			totalNursings += len(nursings)
-			daysWithNursings++
+		// Update totals for averages, excluding current day
+		if !d.Truncate(24 * time.Hour).Equal(currentDay) {
+			if dailySleepHours > 0 {
+				totalSleepHours += dailySleepHours
+				daysWithSleep++
+			}
+			if len(diapers) > 0 {
+				totalDiapers += len(diapers)
+				daysWithDiapers++
+			}
+			if len(nursings) > 0 {
+				totalNursings += len(nursings)
+				daysWithNursings++
+			}
 		}
 	}
 
