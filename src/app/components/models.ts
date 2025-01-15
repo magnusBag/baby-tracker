@@ -9,6 +9,7 @@ export type DiaperInput = {
 export type SleepInput = {
     start: Date;
     end: Date;
+    note?: string;
     id?: string;
     babyId?: string;
 };

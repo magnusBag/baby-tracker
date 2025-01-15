@@ -6,6 +6,7 @@ import {
   IonIcon,
   IonTitle,
   IonToolbar,
+  IonRippleEffect,
 } from "@ionic/angular/standalone";
 import { RouterLink } from "@angular/router";
 import { close } from "ionicons/icons";
@@ -22,6 +23,7 @@ import { addIcons } from "ionicons";
     IonTitle,
     IonButton,
     IonIcon,
+    IonRippleEffect,
   ],
 })
 export class MenuOptionsComponent implements OnInit {

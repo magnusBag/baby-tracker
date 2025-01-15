@@ -14,6 +14,7 @@ import {
   IonItem,
   IonLabel,
   IonModal,
+  IonTextarea,
 } from "@ionic/angular/standalone";
 import { BabiesListComponent } from "../babies-list/babies-list.component";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
@@ -29,6 +30,7 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
     IonButton,
     IonInput,
     BabiesListComponent,
+    IonTextarea,
   ],
   standalone: true,
   template: `
@@ -58,6 +60,13 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
           maxlength="5"
         ></ion-input>
       </ion-item>
+      <ion-item>
+      <ion-textarea 
+            fill="outline" 
+            (ionInput)="onNoteChange($event)" 
+            placeholder="Note"
+        ></ion-textarea>
+      </ion-item>
 
       <div class="ion-padding button-container">
         <ion-button class="form-button" (click)="saveSleep()">Save Sleep</ion-button>
@@ -84,6 +93,7 @@ export class SleepFormComponent {
       Validators.required,
       Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
     ]),
+    note: new FormControl(""),
   });
 
   formatTime(control: string, event: any) {
@@ -129,6 +139,7 @@ export class SleepFormComponent {
       endTime: `${endDate.getHours().toString().padStart(2, "0")}:${
         endDate.getMinutes().toString().padStart(2, "0")
       }`,
+      note: sleep.note,
     });
     this.id.set(sleep.id);
   }
@@ -155,6 +166,7 @@ export class SleepFormComponent {
         end: endDate,
         babyId: this.babiesList()?.choosenBaby()?.id,
         id: this.id(),
+        note: this.form.value.note ?? undefined,
       });
     }
   }
@@ -189,6 +201,7 @@ export class SleepFormComponent {
     this.form.patchValue({
       startTime: lastTimerDate.toISOString().slice(11, 16),
       endTime: now().toISOString().slice(11, 16),
+      note: undefined,
     });
   }
 
@@ -204,6 +217,10 @@ export class SleepFormComponent {
     //handle timezone
     date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
     this.sleepEnd.set(date);
+  }
+
+  onNoteChange(event: any) {
+    this.form.get("note")?.setValue(event.detail.value, { emitEvent: false });
   }
 
   closeModal() {

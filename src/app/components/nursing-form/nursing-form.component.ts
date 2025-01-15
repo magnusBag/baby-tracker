@@ -1,4 +1,11 @@
-import { Component, inject, output, signal, viewChild } from "@angular/core";
+import {
+    Component,
+    ElementRef,
+    inject,
+    output,
+    signal,
+    viewChild,
+} from "@angular/core";
 import { NursingAmount, NursingInput, NursingType } from "../models";
 import {
     IonButton,
@@ -202,7 +209,6 @@ export class NursingFormComponent {
     protected readonly water = water;
 
     babiesList = viewChild(BabiesListComponent);
-
     nursing = signal<NursingInput>({
         type: "both",
         amount: "medium",
@@ -275,9 +281,7 @@ export class NursingFormComponent {
         this.nursingOutput.emit(undefined);
     }
 
-    initializeForm(
-        nursing: { time: Date; type: string; amount: string; id?: string },
-    ) {
+    initializeForm(nursing: NursingInput) {
         const nursingTime = new Date(nursing.time);
         this.form.patchValue({
             time: `${nursingTime.getHours().toString().padStart(2, "0")}:${
@@ -285,6 +289,7 @@ export class NursingFormComponent {
             }`,
             type: nursing.type as NursingType,
             amount: nursing.amount,
+            note: nursing.note,
         });
         this.id.set(nursing.id);
     }

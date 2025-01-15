@@ -151,7 +151,8 @@ export class DiaperFormComponent {
     this.form.get("time")?.setValue(value, { emitEvent: false });
   }
 
-  initializeForm(diaper: { time: Date; type: string; id?: string }) {
+  initializeForm(diaper: DiaperInput) {
+    console.log(diaper);
     const diaperTime = new Date(diaper.time);
     this.form.patchValue({
       time: `${diaperTime.getHours().toString().padStart(2, "0")}:${
@@ -160,6 +161,7 @@ export class DiaperFormComponent {
       type: diaper.type as DiaperType,
     });
     this.id.set(diaper.id);
+    this.note.set(diaper.note);
   }
 
   saveDiaper() {

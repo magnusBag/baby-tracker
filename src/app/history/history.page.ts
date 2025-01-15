@@ -23,6 +23,7 @@ import {
   IonLabel,
   IonList,
   IonModal,
+  IonRippleEffect,
   IonRow,
   IonTitle,
   ViewWillEnter,
@@ -68,6 +69,7 @@ import { NursingFormComponent } from "../components/nursing-form/nursing-form.co
     IonModal,
     IonAccordionGroup,
     IonAccordion,
+    IonRippleEffect,
   ],
 })
 export class HistoryPage implements ViewWillEnter {
@@ -125,7 +127,7 @@ export class HistoryPage implements ViewWillEnter {
       this.sleeps.set(history.sleeps);
       this.diapers.set(history.diapers);
       this.nursings.set(history.nursings);
-
+      console.log(history);
       const values = [];
       if (this.sleeps().length > 0) {
         values.push("sleep");
@@ -283,32 +285,19 @@ export class HistoryPage implements ViewWillEnter {
 
   editSleep(sleep: SleepInput) {
     this.selectedSleep.set(sleep);
-    this.sleepForm()!.initializeForm({
-      start: new Date(sleep.start),
-      end: new Date(sleep.end),
-      id: sleep.id,
-    });
+    this.sleepForm()!.initializeForm(sleep);
     this.sleepModal()?.present();
   }
 
   editDiaper(diaper: DiaperInput) {
     this.selectedDiaper.set(diaper);
-    this.diaperForm()!.initializeForm({
-      time: new Date(diaper.time),
-      type: diaper.type,
-      id: diaper.id,
-    });
+    this.diaperForm()!.initializeForm(diaper);
     this.diaperModal()?.present();
   }
 
   editNursing(nursing: NursingInput) {
     this.selectedNursing.set(nursing);
-    this.nursingForm()!.initializeForm({
-      amount: nursing.amount,
-      time: new Date(nursing.time),
-      type: nursing.type,
-      id: nursing.id,
-    });
+    this.nursingForm()!.initializeForm(nursing);
     this.nursingModal()?.present();
   }
 

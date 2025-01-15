@@ -18,8 +18,9 @@
       </ion-item>
 
       <ion-list slot="content" inset="true">
-        <ion-item *ngFor="let sleep of sleeps()">
-          <ion-label>
+        <ion-item *ngFor="let sleep of sleeps()" class="ion-activatable">
+          <ion-ripple-effect></ion-ripple-effect>
+          <ion-label (click)="editSleep(sleep)">
             {{ sleep.start | date : 'HH:mm' }} - {{ sleep.end | date : 'HH:mm'
             }} - ({{ calculateDurationInHours(sleep.start, sleep.end) | number :
             '1.0-2' }} hours)
@@ -51,8 +52,9 @@
       </ion-item>
 
       <ion-list slot="content" inset="true">
-        <ion-item *ngFor="let diaper of diapers()">
-          <ion-label>
+        <ion-item *ngFor="let diaper of diapers()" class="ion-activatable">
+          <ion-ripple-effect></ion-ripple-effect>
+          <ion-label (click)="editDiaper(diaper)">
             {{ diaper.time | date : 'HH:mm' : 'da-DK' }} - ({{ diaper.type }})
           </ion-label>
           <ion-button fill="clear" slot="end" (click)="editDiaper(diaper)">
@@ -82,8 +84,9 @@
       </ion-item>
 
       <ion-list slot="content" inset="true">
-        <ion-item *ngFor="let nursing of nursings()">
-          <ion-label>
+        <ion-item *ngFor="let nursing of nursings()" class="ion-activatable">
+          <ion-ripple-effect></ion-ripple-effect>
+          <ion-label (click)="editNursing(nursing)">
             {{ nursing.time | date : 'HH:mm' : 'da-DK' }} - ({{ nursing.type }})
           </ion-label>
           <ion-button fill="clear" slot="end" (click)="editNursing(nursing)">
@@ -123,9 +126,10 @@
   <!-- Edit Modals -->
   <ion-modal
     #sleepModal
-    [breakpoints]="[0, 0.5, 0.75, 1]"
-    [initialBreakpoint]="0.5"
+    [breakpoints]="[0, 0.6, 0.75, 1]"
+    [initialBreakpoint]="0.6"
     [keepContentsMounted]="true"
+    (willDismiss)="sleepForm()!.reset()"
   >
     <ng-template>
       <ion-content class="ion-padding">
@@ -139,9 +143,10 @@
 
   <ion-modal
     #diaperModal
-    [breakpoints]="[0, 0.5, 0.75, 1]"
-    [initialBreakpoint]="0.5"
+    [breakpoints]="[0, 0.6, 0.75, 1]"
+    [initialBreakpoint]="0.6"
     [keepContentsMounted]="true"
+    (willDismiss)="diaperForm()!.reset()"
   >
     <ng-template>
       <ion-content class="ion-padding">
@@ -156,8 +161,9 @@
   <ion-modal
     #nursingModal
     [breakpoints]="[0, 0.5, 0.75, 1]"
-    [initialBreakpoint]="0.5"
+    [initialBreakpoint]="0.75"
     [keepContentsMounted]="true"
+    (willDismiss)="nursingForm()!.reset()"
   >
     <ng-template>
       <ion-content class="ion-padding">

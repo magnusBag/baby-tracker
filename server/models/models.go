@@ -7,6 +7,7 @@ type Sleep struct {
 	Start  time.Time `json:"start" gorm:"type:timestamptz"`
 	End    time.Time `json:"end" gorm:"type:timestamptz"`
 	BabyID string    `json:"babyId"`
+	Note   string    `json:"note"`
 }
 
 type Diaper struct {
@@ -14,6 +15,7 @@ type Diaper struct {
 	Type   string    `json:"type"`
 	Time   time.Time `json:"time"`
 	BabyID string    `json:"babyId"`
+	Note   string    `json:"note"`
 }
 
 type Nursing struct {
@@ -22,6 +24,7 @@ type Nursing struct {
 	Amount string    `json:"amount"`
 	Time   time.Time `json:"time"`
 	BabyID string    `json:"babyId"`
+	Note   string    `json:"note"`
 }
 
 type User struct {
