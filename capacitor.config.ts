@@ -22,6 +22,10 @@ const config: CapacitorConfig = {
       resize: true,
     },
   },
+  ios: {
+    contentInset: "always",
+  },
+  android: {},
 };
 
 export default config;
