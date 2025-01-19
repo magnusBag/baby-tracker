@@ -7,6 +7,7 @@ import { DarkModeService } from "./services/dark-mode.service";
 import { BabyService } from "./services/baby.service";
 import { StorageService } from "./services/storage.service";
 import { Preferences } from "@capacitor/preferences";
+import { BubbleNotificationPlugin } from "bubble-notification-plugin";
 
 @Component({
   selector: "app-root",
@@ -43,6 +44,23 @@ export class AppComponent implements OnInit {
         this.router.navigateByUrl(slug);
       }
     });
+
+    // Listen for app pause event (when app goes to background or is closed)
+    App.addListener("pause", async () => {
+      try {
+        await this.babyService.getActiveBaby();
+        const babyName = this.babyService.activeBaby()?.name || "your baby";
+
+        await BubbleNotificationPlugin.showBubbleNotification({
+          title: "Baby Tracker",
+          content:
+            `Track ${babyName}'s activities - tap to quickly add new entries!`,
+        });
+      } catch (error) {
+        console.error("Failed to show bubble notification:", error);
+      }
+    });
+
     this.babyService.checkUserExists();
     this.storageService.refresh();
   }

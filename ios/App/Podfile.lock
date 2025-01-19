@@ -1,4 +1,6 @@
 PODS:
+  - BubbleNotificationPlugin (0.0.1):
+    - Capacitor
   - Capacitor (6.2.0):
     - CapacitorCordova
   - CapacitorApp (6.0.2):
@@ -18,6 +20,7 @@ PODS:
     - Capacitor
 
 DEPENDENCIES:
+  - BubbleNotificationPlugin (from `../../bubble-notification-plugin`)
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
@@ -29,6 +32,8 @@ DEPENDENCIES:
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
 
 EXTERNAL SOURCES:
+  BubbleNotificationPlugin:
+    :path: "../../bubble-notification-plugin"
   Capacitor:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
@@ -49,6 +54,7 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
+  BubbleNotificationPlugin: ca6977858eac6033f9fa0052c0b2d675031255ab
   Capacitor: 1f3c7b9802d958cd8c4eb63895fff85dff2e1eea
   CapacitorApp: 2a8c3a0b0814322e5e6e15fe595f02c3808f0f8b
   CapacitorCordova: b33e7f4aa4ed105dd43283acdd940964374a87d9
@@ -59,6 +65,6 @@ SPEC CHECKSUMS:
   CapacitorPreferences: 9f9935bce493977183511362131a93f7b260191a
   CapacitorStatusBar: 3b9ac7d0684770522c532d1158a1434512ab1477
 
-PODFILE CHECKSUM: 3bf61ad11fbcb8fbe5011d0b93bbda3fb85603a1
+PODFILE CHECKSUM: 3e5477182c923792dc93d61f57159e76a91b7494
 
 COCOAPODS: 1.16.2

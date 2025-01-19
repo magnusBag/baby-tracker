@@ -17,6 +17,7 @@ def capacitor_pods
   pod 'CapacitorKeyboard', :path => '../../node_modules/@capacitor/keyboard'
   pod 'CapacitorPreferences', :path => '../../node_modules/@capacitor/preferences'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
+  pod 'BubbleNotificationPlugin', :path => '../../bubble-notification-plugin'
   pod 'CapacitorEmailComposer', :path => '../../node_modules/capacitor-email-composer'
 end
 

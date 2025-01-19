@@ -32,6 +32,7 @@
     "@capacitor/preferences": "^6.0.3",
     "@capacitor/status-bar": "^6.0.2",
     "@ionic/angular": "^8.0.0",
+    "bubble-notification-plugin": "file:bubble-notification-plugin",
     "capacitor-email-composer": "^6.0.0",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",
