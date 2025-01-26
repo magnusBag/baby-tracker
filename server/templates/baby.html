@@ -231,7 +231,7 @@
               </div>
             </div>
 
-            <!-- Daily Routine Summary -->
+            <!-- Pattern Highlights -->
             <div class="bg-white overflow-hidden shadow rounded-lg">
               <div class="p-5">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
@@ -245,12 +245,12 @@
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                     />
                   </svg>
-                  Daily Routine Summary
+                  Pattern Highlights
                 </h3>
-                <div id="routineInsights" class="mt-4 space-y-3">
+                <div id="patternHighlights" class="mt-4 space-y-3">
                   <div class="animate-pulse">
                     <div class="h-4 bg-gray-200 rounded w-3/4"></div>
                     <div class="space-y-3 mt-4">
@@ -813,6 +813,124 @@
         return correlations;
       }
 
+      function findPatternHighlights(sleepData, nursingData, diaperData) {
+        const highlights = [];
+
+        // Analyze sleep consistency
+        const sleepStarts = sleepData.map((s) => new Date(s.start).getHours());
+        const sleepEnds = sleepData.map((s) => new Date(s.end).getHours());
+
+        // Calculate sleep consistency score (0-100%)
+        const startVariance = calculateVariance(sleepStarts);
+        const endVariance = calculateVariance(sleepEnds);
+        const consistencyScore = Math.round(
+          (1 - (startVariance + endVariance) / 48) * 100
+        );
+
+        if (consistencyScore > 70) {
+          highlights.push(
+            `Very consistent schedule (${consistencyScore}% regular)`
+          );
+        }
+
+        // Find longest sleep period
+        const sleepDurations = sleepData.map((s) => {
+          const start = new Date(s.start);
+          const end = new Date(s.end);
+          return (end - start) / (1000 * 60 * 60);
+        });
+        const maxSleep = Math.max(...sleepDurations);
+        if (maxSleep > 6) {
+          highlights.push(`Achieved ${maxSleep.toFixed(1)} hour sleep session`);
+        }
+
+        // Analyze feeding patterns
+        const feedingHours = nursingData.map((n) =>
+          new Date(n.time).getHours()
+        );
+        const feedingClusters = findTimeClusters(feedingHours);
+        if (feedingClusters.length > 0) {
+          highlights.push(
+            `Regular feeding clusters at ${feedingClusters
+              .map((h) => formatHour(h))
+              .join(" and ")}`
+          );
+        }
+
+        // Find quiet periods (no activities)
+        const allActivities = [
+          ...sleepData.map((s) => ({
+            time: new Date(s.start).getHours(),
+            type: "sleep",
+          })),
+          ...nursingData.map((n) => ({
+            time: new Date(n.time).getHours(),
+            type: "nursing",
+          })),
+          ...diaperData.map((d) => ({
+            time: new Date(d.time).getHours(),
+            type: "diaper",
+          })),
+        ];
+
+        const quietHours = findQuietHours(allActivities);
+        if (quietHours.length > 0) {
+          highlights.push(
+            `Typically calm between ${formatHour(quietHours[0])} - ${formatHour(
+              quietHours[1]
+            )}`
+          );
+        }
+
+        return highlights;
+      }
+
+      function calculateVariance(numbers) {
+        const mean = numbers.reduce((a, b) => a + b, 0) / numbers.length;
+        return (
+          numbers.reduce((a, b) => a + Math.pow(b - mean, 2), 0) /
+          numbers.length
+        );
+      }
+
+      function findTimeClusters(hours) {
+        const frequency = new Array(24).fill(0);
+        hours.forEach((h) => frequency[h]++);
+
+        return frequency
+          .map((count, hour) => ({ hour, count }))
+          .filter(({ count }) => count > hours.length * 0.15)
+          .map(({ hour }) => hour);
+      }
+
+      function findQuietHours(activities) {
+        const frequency = new Array(24).fill(0);
+        activities.forEach((a) => frequency[a.time]++);
+
+        let longestQuiet = { start: 0, length: 0 };
+        let currentQuiet = { start: 0, length: 0 };
+
+        for (let i = 0; i < 48; i++) {
+          const hour = i % 24;
+          if (frequency[hour] <= 1) {
+            if (currentQuiet.length === 0) {
+              currentQuiet.start = hour;
+            }
+            currentQuiet.length++;
+          } else {
+            if (currentQuiet.length > longestQuiet.length) {
+              longestQuiet = { ...currentQuiet };
+            }
+            currentQuiet = { start: 0, length: 0 };
+          }
+        }
+
+        return [
+          longestQuiet.start,
+          (longestQuiet.start + longestQuiet.length) % 24,
+        ];
+      }
+
       function updateInsights(sleepData, nursingData, diaperData, dateRange) {
         // Analyze sleep patterns
         const sleepPatterns = analyzeSleepPatterns(sleepData, dateRange);
@@ -852,53 +970,28 @@
           </ul>
         `;
 
-        // Generate daily routine summary
-        const routineSummary = generateRoutineSummary(
+        // Update pattern highlights instead of routine summary
+        const highlights = findPatternHighlights(
           sleepData,
           nursingData,
           diaperData
         );
-        document.getElementById("routineInsights").innerHTML = routineSummary;
-      }
-
-      function generateRoutineSummary(sleepData, nursingData, diaperData) {
-        // Analyze recent data to find patterns
-        const recentSleep = sleepData.slice(-7);
-        const recentNursing = nursingData.slice(-7);
-
-        // Calculate typical day structure with timezone adjustment
-        const wakingHour = Math.round(
-          average(
-            recentSleep.map((s) => (new Date(s.start).getHours() - 1 + 24) % 24)
-          )
-        );
-        const bedtimeHour = Math.round(
-          average(
-            recentSleep.map((s) => (new Date(s.end).getHours() - 1 + 24) % 24)
-          )
-        );
-
-        const feedingsPerDay = Math.round(recentNursing.length / 7);
-
-        return `
-          <p class="text-gray-600">Typical Day:</p>
-          <ul class="list-disc list-inside text-gray-600 mt-2">
-            <li>Waking around ${formatHour(wakingHour)}</li>
-            <li>~${feedingsPerDay} feedings throughout the day</li>
-            <li>Bedtime around ${formatHour(bedtimeHour)}</li>
-          </ul>
+        document.getElementById("patternHighlights").innerHTML = `
+          <div class="space-y-2">
+            ${highlights
+              .map(
+                (highlight) => `
+              <div class="flex items-center text-gray-600">
+                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                ${highlight}
+              </div>
+            `
+              )
+              .join("")}
+          </div>
         `;
-      }
-
-      function average(numbers) {
-        return numbers.reduce((a, b) => a + b, 0) / numbers.length;
-      }
-
-      function formatHour(hour) {
-        // Ensure hour is between 0-23
-        hour = hour % 24;
-        // Format as HH:00
-        return `${hour.toString().padStart(2, "0")}:00`;
       }
 
       initializePage();
