@@ -2,7 +2,7 @@ package main
 
 import (
 	"baby-tracker/database"
-	"baby-tracker/routers"
+	"baby-tracker/routers/api"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,11 +13,19 @@ func main() {
 
 	r := gin.Default()
 
+	// Configure trusted proxies
+	// For development, we'll trust only loopback addresses (127.0.0.1/8, ::1/128)
+	r.SetTrustedProxies([]string{"127.0.0.1/8", "::1/128"})
+
+	// Load templates and static files
+	r.LoadHTMLGlob("templates/*")
+	r.Static("/static", "./static")
+
 	// CORS middleware
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Parrent-User-ID")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Parrent-User-ID")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
@@ -26,18 +34,37 @@ func main() {
 
 		c.Next()
 	})
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "alive"})
+
+	// Public routes
+	r.GET("", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	api := r.Group("/api")
+	// Auth endpoints
+	auth := r.Group("/auth")
 	{
-		routers.SetupUserRoutes(api)
-		routers.SetupSleepRoutes(api)
-		routers.SetupDiaperRoutes(api)
-		routers.SetupBabyRoutes(api)
-		routers.SetupReportRoutes(api)
-		routers.SetupNursingRoutes(api)
+		auth.POST("/register", api.Register)
+		auth.POST("/login", api.Login)
+	}
+
+	// Frontend pages (protected by client-side auth)
+	r.GET("/dashboard", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "dashboard.html", nil)
+	})
+	r.GET("/baby/:id", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "baby.html", nil)
+	})
+
+	// Protected API routes
+	apiGroup := r.Group("/api")
+	apiGroup.Use(api.AuthMiddleware())
+	{
+		api.SetupUserRoutes(apiGroup)
+		api.SetupSleepRoutes(apiGroup)
+		api.SetupDiaperRoutes(apiGroup)
+		api.SetupBabyRoutes(apiGroup)
+		api.SetupReportRoutes(apiGroup)
+		api.SetupNursingRoutes(apiGroup)
 	}
 
 	r.Run(":3000")

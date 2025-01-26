@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baby Tracker - Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-lg">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <a href="/dashboard" class="text-xl font-bold text-indigo-600"
+              >Baby Tracker</a
+            >
+          </div>
+          <div class="flex items-center">
+            <button
+              onclick="logout()"
+              class="text-gray-600 hover:text-gray-900"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div class="px-4 py-6 sm:px-0">
+        <div class="flex justify-between items-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900">Your Babies</h1>
+          <button
+            onclick="showAddBabyModal()"
+            class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+          >
+            Add Baby
+          </button>
+        </div>
+
+        <!-- Baby Cards -->
+        <div
+          id="babyCards"
+          class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          <!-- Cards will be added here dynamically -->
+        </div>
+
+        <!-- Add Baby Modal -->
+        <div
+          id="addBabyModal"
+          class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden"
+        >
+          <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+              <h2 class="text-2xl font-bold mb-4">Add Baby</h2>
+              <form id="addBabyForm" class="space-y-4">
+                <div>
+                  <label
+                    for="babyId"
+                    class="block text-sm font-medium text-gray-700"
+                    >Baby ID</label
+                  >
+                  <input
+                    type="text"
+                    id="babyId"
+                    name="babyId"
+                    required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <p class="mt-1 text-sm text-gray-500">
+                    Enter the ID of the baby you want to add to your profile.
+                  </p>
+                </div>
+                <div class="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onclick="hideAddBabyModal()"
+                    class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  >
+                    Add Baby
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/";
+      }
+
+      function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/";
+      }
+
+      function showAddBabyModal() {
+        document.getElementById("addBabyModal").classList.remove("hidden");
+      }
+
+      function hideAddBabyModal() {
+        document.getElementById("addBabyModal").classList.add("hidden");
+      }
+
+      function createBabyCard(baby) {
+        return `
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">${baby.name}</h3>
+                        <p class="text-sm text-gray-500 mb-4">ID: ${baby.id}</p>
+                        <a href="/baby/${baby.id}" 
+                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                            View Statistics
+                        </a>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Verify token is valid by making a test request
+      async function verifyToken() {
+        try {
+          const response = await fetch("/api/baby", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.status === 401) {
+            localStorage.removeItem("token"); // Clear invalid token
+            window.location.href = "/";
+            return false;
+          }
+          return true;
+        } catch (error) {
+          console.error("Error verifying token:", error);
+          return false;
+        }
+      }
+
+      async function loadBabies() {
+        try {
+          const response = await fetch("/api/baby", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "/";
+            return;
+          }
+
+          const babies = await response.json();
+          const babyCardsContainer = document.getElementById("babyCards");
+          babyCardsContainer.innerHTML = babies
+            .map((baby) => createBabyCard(baby))
+            .join("");
+        } catch (error) {
+          console.error("Error loading babies:", error);
+          alert("Error loading babies");
+        }
+      }
+
+      // Initialize page
+      async function initializePage() {
+        // First check if we have a token
+        if (!token) {
+          window.location.href = "/";
+          return;
+        }
+
+        // Verify token and load data if valid
+        const isValid = await verifyToken();
+        if (isValid) {
+          await loadBabies();
+        } else {
+          window.location.href = "/";
+        }
+      }
+
+      // Start initialization
+      initializePage();
+
+      document
+        .getElementById("addBabyForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const babyId = document.getElementById("babyId").value;
+
+          try {
+            const response = await fetch(`/api/baby/${babyId}/parent`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (response.status === 401) {
+              window.location.href = "/";
+              return;
+            }
+
+            if (response.ok) {
+              hideAddBabyModal();
+              loadBabies(); // Reload the baby list
+            } else {
+              const data = await response.json();
+              alert(data.error || "Failed to add baby");
+            }
+          } catch (error) {
+            console.error("Error adding baby:", error);
+            alert("Error adding baby");
+          }
+        });
+    </script>
+  </body>
+</html>

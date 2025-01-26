@@ -1,4 +1,4 @@
-package routers
+package api
 
 import (
 	"baby-tracker/database"
@@ -186,11 +186,35 @@ func reverseDailySummaries(summaries []DailySummary) []DailySummary {
 
 func SetupReportRoutes(api *gin.RouterGroup) {
 	report := api.Group("/report")
+	report.Use(AuthMiddleware()) // Add authentication middleware
 	{
 		// Existing endpoint with date as query parameter
-		report.GET("/:id", checkBabyAccess(), func(c *gin.Context) {
+		report.GET("/:id", func(c *gin.Context) {
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+
 			babyID := c.Param("id")
 			dateStr := c.Query("date") // expects date in format "2006-01-02"
+
+			// Check if user has access to this baby
+			if err := database.DB.Preload("Babies").First(&user, "id = ?", user.ID).Error; err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+				return
+			}
+
+			hasAccess := false
+			for _, baby := range user.Babies {
+				if baby.ID == babyID {
+					hasAccess = true
+					break
+				}
+			}
+
+			if !hasAccess {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access to this baby"})
+				return
+			}
 
 			var date time.Time
 			var err error
@@ -208,8 +232,32 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 		})
 
 		// New endpoint with date in URL path
-		report.GET("/:id/date/:year/:month/:day", checkBabyAccess(), func(c *gin.Context) {
+		report.GET("/:id/date/:year/:month/:day", func(c *gin.Context) {
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+
 			babyID := c.Param("id")
+
+			// Check if user has access to this baby
+			if err := database.DB.Preload("Babies").First(&user, "id = ?", user.ID).Error; err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+				return
+			}
+
+			hasAccess := false
+			for _, baby := range user.Babies {
+				if baby.ID == babyID {
+					hasAccess = true
+					break
+				}
+			}
+
+			if !hasAccess {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access to this baby"})
+				return
+			}
+
 			year := c.Param("year")
 			month := c.Param("month")
 			day := c.Param("day")
@@ -225,8 +273,32 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 		})
 
 		// Weekly report endpoint
-		report.GET("/:id/weekly", checkBabyAccess(), func(c *gin.Context) {
+		report.GET("/:id/weekly", func(c *gin.Context) {
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+
 			babyID := c.Param("id")
+
+			// Check if user has access to this baby
+			if err := database.DB.Preload("Babies").First(&user, "id = ?", user.ID).Error; err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+				return
+			}
+
+			hasAccess := false
+			for _, baby := range user.Babies {
+				if baby.ID == babyID {
+					hasAccess = true
+					break
+				}
+			}
+
+			if !hasAccess {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access to this baby"})
+				return
+			}
+
 			dateStr := c.Query("endDate") // optional, defaults to today
 
 			var endDate time.Time
@@ -243,9 +315,34 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 
 			getWeeklyReport(c, babyID, endDate)
 		})
+
 		// get history for specific date
-		report.GET("/:id/history/:date", checkBabyAccess(), func(c *gin.Context) {
+		report.GET("/:id/history/:date", func(c *gin.Context) {
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+
 			babyID := c.Param("id")
+
+			// Check if user has access to this baby
+			if err := database.DB.Preload("Babies").First(&user, "id = ?", user.ID).Error; err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+				return
+			}
+
+			hasAccess := false
+			for _, baby := range user.Babies {
+				if baby.ID == babyID {
+					hasAccess = true
+					break
+				}
+			}
+
+			if !hasAccess {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access to this baby"})
+				return
+			}
+
 			dateStr := c.Param("date")
 			date, err := time.Parse("2006-01-02", dateStr)
 			if err != nil {

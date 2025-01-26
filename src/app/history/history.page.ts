@@ -26,6 +26,7 @@ import {
   IonRippleEffect,
   IonRow,
   IonTitle,
+  ViewDidEnter,
   ViewWillEnter,
 } from "@ionic/angular/standalone";
 import { StorageService } from "../services/storage.service";
@@ -72,7 +73,7 @@ import { NursingFormComponent } from "../components/nursing-form/nursing-form.co
     IonRippleEffect,
   ],
 })
-export class HistoryPage implements ViewWillEnter {
+export class HistoryPage implements ViewWillEnter, ViewDidEnter {
   storageService = inject(StorageService);
   historyService = inject(HistoryService);
   private alertController = inject(AlertController);
@@ -85,7 +86,14 @@ export class HistoryPage implements ViewWillEnter {
   nursings = signal<NursingInput[]>([]);
 
   totalSleepDuration = computed(() => {
-    return this.sleeps().reduce((acc, sleep) => {
+    const sleepsArray = this.sleeps();
+    if (!sleepsArray || !Array.isArray(sleepsArray)) {
+      return 0;
+    }
+    return sleepsArray.reduce((acc, sleep) => {
+      if (!sleep.start || !sleep.end) {
+        return acc;
+      }
       return acc + this.calculateDurationInHours(sleep.start, sleep.end);
     }, 0);
   });
@@ -120,22 +128,24 @@ export class HistoryPage implements ViewWillEnter {
 
   async ionViewWillEnter() {
     if (this.babyService.activeBaby()) {
+      console.log("active baby", this.babyService.activeBaby());
+
       const history = await this.historyService.getHistoryForBaby(
         this.babyService.activeBaby()!.id,
         this.date(),
       );
-      this.sleeps.set(history.sleeps);
-      this.diapers.set(history.diapers);
-      this.nursings.set(history.nursings);
+      this.sleeps.set(history.sleeps || []);
+      this.diapers.set(history.diapers || []);
+      this.nursings.set(history.nursings || []);
       console.log(history);
       const values = [];
-      if (this.sleeps().length > 0) {
+      if (this.sleeps() && this.sleeps().length > 0) {
         values.push("sleep");
       }
-      if (this.diapers().length > 0) {
+      if (this.diapers() && this.diapers().length > 0) {
         values.push("diapers");
       }
-      if (this.nursings().length > 0) {
+      if (this.nursings() && this.nursings().length > 0) {
         values.push("nursings");
       }
       this.accordionGroup.value = values;

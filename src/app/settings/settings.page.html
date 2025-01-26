@@ -44,7 +44,7 @@
         <ion-text>add baby by id</ion-text>
       </ion-button>
     </div>
-    <ion-item>
+    <ion-item class="ion-padding-top ion-padding-bottom" inset>
       <ion-text>Start app on history page</ion-text>
       <ion-toggle
         slot="end"
@@ -53,5 +53,8 @@
       >
       </ion-toggle>
     </ion-item>
+    <ion-button class="ion-padding-top" (click)="showBubbleNotification()">
+      <ion-text>Show bubble notification</ion-text>
+    </ion-button>
   </div>
 </ion-content>

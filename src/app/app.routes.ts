@@ -36,4 +36,14 @@ export const routes: Routes = [
         m.WeeklyReportPage
       ),
   },
+  {
+    path: "history-solo",
+    loadComponent: () =>
+      import("./history-solo/history-solo.page").then((m) => m.HistorySoloPage),
+  },
+  {
+    path: "register",
+    loadComponent: () =>
+      import("./register/register.page").then((m) => m.RegisterPage),
+  },
 ];

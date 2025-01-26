@@ -4,6 +4,7 @@ import { CapacitorHttp } from "@capacitor/core";
 import { environment } from "src/environments/environment";
 import { Device } from "@capacitor/device";
 import { Preferences } from "@capacitor/preferences";
+import { HeadersService } from "./headers.service";
 
 @Injectable({
     providedIn: "root",
@@ -14,26 +15,28 @@ export class BabyService {
     babies = signal<Baby[]>([]);
     activeBaby = signal<Baby | undefined>(undefined);
 
-    constructor() {
-        Preferences.get({ key: "activeBaby" }).then((result) => {
-            if (result.value) {
-                this.activeBaby.set(JSON.parse(result.value));
-            }
-        });
+    constructor(private headersService: HeadersService) {
+        this.loadActiveBaby();
     }
+
+    private async loadActiveBaby() {
+        const result = await Preferences.get({ key: "activeBaby" });
+        if (result.value) {
+            const savedBaby = JSON.parse(result.value);
+            this.activeBaby.set(savedBaby);
+        }
+    }
+
     async getActiveBaby() {
         const result = await Preferences.get({ key: "activeBaby" });
         if (result.value) {
-            this.activeBaby.set(JSON.parse(result.value));
+            const savedBaby = JSON.parse(result.value);
+            this.activeBaby.set(savedBaby);
         }
     }
+
     async headers() {
-        const deviceID = await Device.getId();
-        return {
-            "X-Parrent-User-ID": deviceID.identifier,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        };
+        return await this.headersService.getHeaders();
     }
 
     async checkUserExists() {
@@ -62,7 +65,7 @@ export class BabyService {
                 headers: await this.headers(),
                 data: { name },
             });
-            const newBaby = { ...response.data, active: false };
+            const newBaby = response.data;
             console.log("New baby", newBaby);
             this.babies.update((babies) => [...babies, newBaby]);
 
@@ -75,6 +78,7 @@ export class BabyService {
             throw error;
         }
     }
+
     async addBabyById(id: string) {
         const response = await CapacitorHttp.post({
             url: `${this.apiUrl}/baby/${id}/parent`,
@@ -82,12 +86,15 @@ export class BabyService {
             data: { babyId: id },
         });
         console.log("Baby", response.data);
-        this.refresh();
+        await this.refresh();
         return response.data;
     }
 
     async setActiveBaby(baby: Baby) {
-        Preferences.set({ key: "activeBaby", value: JSON.stringify(baby) });
+        await Preferences.set({
+            key: "activeBaby",
+            value: JSON.stringify(baby),
+        });
         this.activeBaby.set(baby);
     }
 
@@ -97,9 +104,31 @@ export class BabyService {
                 url: `${this.apiUrl}/baby`,
                 headers: await this.headers(),
             });
-            this.babies.set(response.data ?? []);
+
+            // Ensure response.data is an array
+            const babies = Array.isArray(response.data) ? response.data : [];
+            this.babies.set(babies);
+
+            // If we have babies but no active baby, set the first one as active
+            if (babies.length > 0 && !this.activeBaby()) {
+                await this.setActiveBaby(babies[0]);
+            }
+
+            // If we have an active baby, make sure it still exists in the list
+            const activeBaby = this.activeBaby();
+            if (activeBaby) {
+                const babyStillExists = babies.some((b) =>
+                    b.id === activeBaby.id
+                );
+                if (!babyStillExists && babies.length > 0) {
+                    await this.setActiveBaby(babies[0]);
+                } else if (!babyStillExists) {
+                    this.activeBaby.set(undefined);
+                }
+            }
         } catch (error) {
             console.error("Failed to fetch babies:", error);
+            this.babies.set([]);
             throw error;
         }
     }
@@ -113,6 +142,16 @@ export class BabyService {
             this.babies.update((babies) =>
                 babies.filter((b) => b.id !== baby.id)
             );
+
+            // If we deleted the active baby, set a new one
+            if (this.activeBaby()?.id === baby.id) {
+                const remainingBabies = this.babies();
+                if (remainingBabies.length > 0) {
+                    await this.setActiveBaby(remainingBabies[0]);
+                } else {
+                    this.activeBaby.set(undefined);
+                }
+            }
         } catch (error) {
             console.error("Failed to delete baby:", error);
             throw error;
@@ -131,6 +170,11 @@ export class BabyService {
                     b.id === baby.id ? { ...b, name: baby.name } : b
                 )
             );
+
+            // If we edited the active baby, update it
+            if (this.activeBaby()?.id === baby.id) {
+                await this.setActiveBaby(baby);
+            }
         } catch (error) {
             console.error("Failed to update baby:", error);
             throw error;

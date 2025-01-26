@@ -11,7 +11,7 @@
     >
       <div class="btn-inner">
         <div class="dots-container">
-          @for (diaper of storageService.totalDiapersToday(); track diaper) {
+          @for (diaper of storageService.totalDiapersToday(); track diaper.id) {
           <div class="dot" [class]="diaper.type"></div>
           }
         </div>
@@ -26,8 +26,8 @@
       <div class="btn-inner">
         <div class="dots-container">
           @for (dot of storageService.sleepArrayFromTotalHoursSlept(); track
-          dot) {
-          <div class="dot" [class]="dot"></div>
+          dot.id) {
+          <div class="dot" [class]="dot.type"></div>
           }
         </div>
         <img
@@ -44,7 +44,7 @@
     >
       <div class="btn-inner">
         <div class="dots-container">
-          @for (dot of storageService.totalNursingsToday(); track dot) {
+          @for (dot of storageService.totalNursingsToday(); track dot.id) {
           <div
             class="dot"
             [class.left]="dot.type === 'left'"

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baby Statistics</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-lg">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <a href="/" class="text-xl font-bold text-indigo-600"
+              >Baby Tracker</a
+            >
+          </div>
+          <div class="flex items-center">
+            <button
+              onclick="logout()"
+              class="text-gray-600 hover:text-gray-900"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div class="px-4 py-6 sm:px-0">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8" id="babyName">
+          Loading...
+        </h1>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <!-- Sleep Chart -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <h3 class="text-lg font-medium text-gray-900">Sleep Hours</h3>
+              <div class="mt-4 h-64">
+                <canvas id="sleepChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diaper Chart -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <h3 class="text-lg font-medium text-gray-900">Diaper Changes</h3>
+              <div class="mt-4 h-64">
+                <canvas id="diaperChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nursing Chart -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <h3 class="text-lg font-medium text-gray-900">
+                Nursing Sessions
+              </h3>
+              <div class="mt-4 h-64">
+                <canvas id="nursingChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Check authentication
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/";
+      }
+
+      function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/";
+      }
+
+      // Get baby ID from URL
+      const babyId = window.location.pathname.split("/").pop();
+
+      // Fetch baby data and create charts
+      async function fetchData() {
+        try {
+          const headers = {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          };
+
+          const [sleepResponse, diaperResponse, nursingResponse, babyResponse] =
+            await Promise.all([
+              fetch(`/api/sleep?babyId=${babyId}`, { headers }),
+              fetch(`/api/diaper?babyId=${babyId}`, { headers }),
+              fetch(`/api/nursing?babyId=${babyId}`, { headers }),
+              fetch(`/api/baby/${babyId}`, { headers }),
+            ]);
+
+          // Check for unauthorized responses
+          if (
+            [sleepResponse, diaperResponse, nursingResponse, babyResponse].some(
+              (r) => r.status === 401
+            )
+          ) {
+            localStorage.removeItem("token");
+            window.location.href = "/";
+            return;
+          }
+
+          // Check if baby was found
+          if (babyResponse.status === 404) {
+            document.getElementById("babyName").textContent = "Baby not found";
+            return;
+          }
+
+          // Check if all responses are ok
+          if (
+            ![
+              sleepResponse,
+              diaperResponse,
+              nursingResponse,
+              babyResponse,
+            ].every((r) => r.ok)
+          ) {
+            throw new Error("One or more requests failed");
+          }
+
+          const [sleepData, diaperData, nursingData, babyData] =
+            await Promise.all([
+              sleepResponse.json(),
+              diaperResponse.json(),
+              nursingResponse.json(),
+              babyResponse.json(),
+            ]);
+
+          // Update baby name
+          document.getElementById("babyName").textContent =
+            babyData.name + "'s Statistics";
+
+          // Process data for charts
+          const last7Days = [...Array(7)]
+            .map((_, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() - i);
+              return d.toISOString().split("T")[0];
+            })
+            .reverse();
+
+          // Create sleep chart
+          const sleepHours = last7Days.map((date) => {
+            const dayData = sleepData.filter((s) => s.start.startsWith(date));
+            return dayData.reduce((total, sleep) => {
+              const start = new Date(sleep.start);
+              const end = new Date(sleep.end);
+              return total + (end - start) / (1000 * 60 * 60);
+            }, 0);
+          });
+
+          new Chart(document.getElementById("sleepChart"), {
+            type: "line",
+            data: {
+              labels: last7Days.map((d) => new Date(d).toLocaleDateString()),
+              datasets: [
+                {
+                  label: "Hours of Sleep",
+                  data: sleepHours,
+                  borderColor: "rgb(99, 102, 241)",
+                  tension: 0.1,
+                },
+              ],
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: "Hours",
+                  },
+                },
+              },
+            },
+          });
+
+          // Create diaper chart
+          const diaperCounts = last7Days.map(
+            (date) => diaperData.filter((d) => d.time.startsWith(date)).length
+          );
+
+          new Chart(document.getElementById("diaperChart"), {
+            type: "bar",
+            data: {
+              labels: last7Days.map((d) => new Date(d).toLocaleDateString()),
+              datasets: [
+                {
+                  label: "Diaper Changes",
+                  data: diaperCounts,
+                  backgroundColor: "rgb(147, 197, 253)",
+                },
+              ],
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1,
+                  },
+                },
+              },
+            },
+          });
+
+          // Create nursing chart
+          const nursingCounts = last7Days.map(
+            (date) => nursingData.filter((n) => n.time.startsWith(date)).length
+          );
+
+          new Chart(document.getElementById("nursingChart"), {
+            type: "bar",
+            data: {
+              labels: last7Days.map((d) => new Date(d).toLocaleDateString()),
+              datasets: [
+                {
+                  label: "Nursing Sessions",
+                  data: nursingCounts,
+                  backgroundColor: "rgb(252, 165, 165)",
+                },
+              ],
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1,
+                  },
+                },
+              },
+            },
+          });
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          document.getElementById("babyName").textContent =
+            "Error loading statistics";
+        }
+      }
+
+      // Initialize page
+      async function initializePage() {
+        if (!token) {
+          window.location.href = "/";
+          return;
+        }
+        await fetchData();
+      }
+
+      initializePage();
+    </script>
+  </body>
+</html>

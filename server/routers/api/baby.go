@@ -1,4 +1,4 @@
-package routers
+package api
 
 import (
 	"baby-tracker/database"
@@ -11,19 +11,55 @@ import (
 
 func SetupBabyRoutes(api *gin.RouterGroup) {
 	baby := api.Group("/baby")
+	baby.Use(AuthMiddleware()) // Add authentication middleware to all baby routes
 	{
-		baby.POST("", func(c *gin.Context) {
-			userID := c.GetHeader("X-Parrent-User-ID")
-			if userID == "" {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not provided"})
+		// Get single baby
+		baby.GET("/:id", func(c *gin.Context) {
+			id := c.Param("id")
+			var baby models.Baby
+			if err := database.DB.Preload("Parents").First(&baby, "id = ?", id).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
 				return
 			}
 
-			var user models.User
-			if err := database.DB.First(&user, "id = ?", userID).Error; err != nil {
+			// Check if the current user has access to this baby
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+			hasAccess := false
+			for _, parent := range baby.Parents {
+				if parent.ID == user.ID {
+					hasAccess = true
+					break
+				}
+			}
+
+			if !hasAccess {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access to this baby"})
+				return
+			}
+
+			c.JSON(http.StatusOK, baby)
+		})
+
+		// Get all babies for user
+		baby.GET("", func(c *gin.Context) {
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+
+			// Reload user with babies
+			if err := database.DB.Preload("Babies").First(&user, "id = ?", user.ID).Error; err != nil {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 				return
 			}
+			c.JSON(http.StatusOK, user.Babies)
+		})
+
+		// Create new baby
+		baby.POST("", func(c *gin.Context) {
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
 
 			var baby models.Baby
 			if err := c.ShouldBindJSON(&baby); err != nil {
@@ -46,21 +82,6 @@ func SetupBabyRoutes(api *gin.RouterGroup) {
 			c.JSON(http.StatusOK, baby)
 		})
 
-		baby.GET("", func(c *gin.Context) {
-			userID := c.GetHeader("X-Parrent-User-ID")
-			if userID == "" {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not provided"})
-				return
-			}
-
-			var user models.User
-			if err := database.DB.Preload("Babies").First(&user, "id = ?", userID).Error; err != nil {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
-				return
-			}
-			c.JSON(http.StatusOK, user.Babies)
-		})
-
 		baby.PUT("/:id", checkBabyAccess(), func(c *gin.Context) {
 			id := c.Param("id")
 			var baby models.Baby
@@ -81,20 +102,13 @@ func SetupBabyRoutes(api *gin.RouterGroup) {
 
 			c.JSON(http.StatusOK, baby)
 		})
-		//add parent to baby
+
 		baby.POST("/:id/parent", func(c *gin.Context) {
 			id := c.Param("id")
-			userID := c.GetHeader("X-Parrent-User-ID")
-			if userID == "" {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not provided"})
-				return
-			}
 
-			var parentToAdd models.User
-			if err := database.DB.First(&parentToAdd, "id = ?", userID).Error; err != nil {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Parent user not found"})
-				return
-			}
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
 
 			var baby models.Baby
 			if err := database.DB.Preload("Parents").First(&baby, "id = ?", id).Error; err != nil {
@@ -104,13 +118,13 @@ func SetupBabyRoutes(api *gin.RouterGroup) {
 
 			// Check if parent is already added
 			for _, existingParent := range baby.Parents {
-				if existingParent.ID == parentToAdd.ID {
+				if existingParent.ID == user.ID {
 					c.JSON(http.StatusBadRequest, gin.H{"error": "Parent already added to this baby"})
 					return
 				}
 			}
 
-			baby.Parents = append(baby.Parents, parentToAdd)
+			baby.Parents = append(baby.Parents, user)
 			if err := database.DB.Save(&baby).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return

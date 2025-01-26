@@ -1,4 +1,4 @@
-package routers
+package api
 
 import (
 	"baby-tracker/database"
@@ -13,6 +13,7 @@ import (
 
 func SetupSleepRoutes(api *gin.RouterGroup) {
 	sleep := api.Group("/sleep")
+	sleep.Use(AuthMiddleware()) // Add authentication middleware
 	{
 		sleep.POST("", checkBabyAccess(), func(c *gin.Context) {
 			var sleepInput struct {
@@ -61,25 +62,38 @@ func SetupSleepRoutes(api *gin.RouterGroup) {
 		})
 
 		sleep.GET("", func(c *gin.Context) {
-			userID := c.GetHeader("X-Parrent-User-ID")
-			if userID == "" {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not provided"})
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+
+			// Get babyId from query parameter
+			babyID := c.Query("babyId")
+			if babyID == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Baby ID not provided"})
 				return
 			}
 
-			var user models.User
-			if err := database.DB.Preload("Babies").First(&user, "id = ?", userID).Error; err != nil {
+			// Check if user has access to this baby
+			if err := database.DB.Preload("Babies").First(&user, "id = ?", user.ID).Error; err != nil {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 				return
 			}
 
-			var babyIDs []string
+			hasAccess := false
 			for _, baby := range user.Babies {
-				babyIDs = append(babyIDs, baby.ID)
+				if baby.ID == babyID {
+					hasAccess = true
+					break
+				}
+			}
+
+			if !hasAccess {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access to this baby"})
+				return
 			}
 
 			var sleeps []models.Sleep
-			if err := database.DB.Where("baby_id IN ?", babyIDs).Find(&sleeps).Error; err != nil {
+			if err := database.DB.Where("baby_id = ?", babyID).Find(&sleeps).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}

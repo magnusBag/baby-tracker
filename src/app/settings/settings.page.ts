@@ -37,6 +37,7 @@ import {
   trash,
 } from "ionicons/icons";
 import { addIcons } from "ionicons";
+import { BubbleNotificationPlugin } from "bubble-notification-plugin";
 
 @Component({
   selector: "app-settings",
@@ -172,5 +173,16 @@ export class SettingsPage implements ViewWillEnter {
       value: isChecked.toString(),
     });
     this.startOnHistory.set(isChecked);
+  }
+
+  async showBubbleNotification() {
+    await this.babyService.getActiveBaby();
+    const babyName = this.babyService.activeBaby()?.name || "your baby";
+
+    await BubbleNotificationPlugin.showBubbleNotification({
+      title: "Baby Tracker",
+      content:
+        `Track ${babyName}'s activities - tap to quickly add new entries!`,
+    });
   }
 }

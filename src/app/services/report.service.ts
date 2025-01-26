@@ -2,6 +2,8 @@ import { effect, inject, Injectable, signal } from "@angular/core";
 import { CapacitorHttp } from "@capacitor/core";
 import { environment } from "src/environments/environment";
 import { BabyService } from "./baby.service";
+import { AuthService } from "./auth.service";
+import { HeadersService } from "./headers.service";
 
 export interface DailyReport {
     date: string;
@@ -46,6 +48,7 @@ export interface WeeklyReport {
 export class ReportService {
     private apiUrl = environment.apiUrl;
     private babyService = inject(BabyService);
+    private headersService = inject(HeadersService);
 
     constructor() {
     }
@@ -59,7 +62,7 @@ export class ReportService {
         const queryParams = date ? `?date=${date}` : "";
         const response = await CapacitorHttp.get({
             url: `${this.apiUrl}/report/${activeBaby.id}${queryParams}`,
-            headers: await this.babyService.headers(),
+            headers: await this.headersService.getHeaders(),
         });
 
         return response.data;
@@ -74,7 +77,7 @@ export class ReportService {
         const queryParams = endDate ? `?endDate=${endDate}` : "";
         const response = await CapacitorHttp.get({
             url: `${this.apiUrl}/report/${activeBaby.id}/weekly${queryParams}`,
-            headers: await this.babyService.headers(),
+            headers: await this.headersService.getHeaders(),
         });
 
         return response.data;

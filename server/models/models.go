@@ -28,8 +28,10 @@ type Nursing struct {
 }
 
 type User struct {
-	ID     string `json:"id" gorm:"primaryKey"`
-	Babies []Baby `json:"babies,omitempty" gorm:"many2many:user_babies"`
+	ID       string `json:"id" gorm:"primaryKey"`
+	Username string `json:"username" gorm:"unique;not null"`
+	Password string `json:"-" gorm:"not null"` // "-" means this field won't be included in JSON
+	Babies   []Baby `json:"babies,omitempty" gorm:"many2many:user_babies"`
 }
 
 type Baby struct {
