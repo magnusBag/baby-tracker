@@ -11,6 +11,8 @@ import (
 )
 
 func SetupNursingRoutes(api *gin.RouterGroup) {
+
+	// Protected routes
 	nursing := api.Group("/nursing")
 	nursing.Use(AuthMiddleware()) // Add authentication middleware
 	{
@@ -132,39 +134,6 @@ func SetupNursingRoutes(api *gin.RouterGroup) {
 				return
 			}
 			c.JSON(http.StatusOK, nursing)
-		})
-	}
-
-	// Public routes (no auth required)
-	public := api.Group("/public/nursing")
-	{
-		public.GET("", func(c *gin.Context) {
-			shareToken := c.Query("babyId") // Using babyId param to maintain frontend compatibility
-			var baby models.Baby
-			if err := database.DB.First(&baby, "share_token = ?", shareToken).Error; err != nil {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
-				return
-			}
-
-			var nursings []models.Nursing
-			if err := database.DB.Where("baby_id = ?", baby.ID).Find(&nursings).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-
-			// Convert times to RFC3339 format
-			response := make([]gin.H, len(nursings))
-			for i, nursing := range nursings {
-				response[i] = gin.H{
-					"id":     nursing.ID,
-					"type":   nursing.Type,
-					"amount": nursing.Amount,
-					"time":   nursing.Time.Format(time.RFC3339),
-					"babyId": nursing.BabyID,
-					"note":   nursing.Note,
-				}
-			}
-			c.JSON(http.StatusOK, response)
 		})
 	}
 }

@@ -80,15 +80,9 @@ func main() {
 			api.SetupNursingRoutes(protected)
 		}
 
-		// Public routes
+		// Public routes (no auth required)
 		public := apiGroup.Group("/public")
-		{
-			api.SetupBabyRoutes(public)
-			api.SetupSleepRoutes(public)
-			api.SetupDiaperRoutes(public)
-			api.SetupNursingRoutes(public)
-			api.SetupReportRoutes(public)
-		}
+		api.SetupPublicRoutes(public)
 	}
 
 	r.Run(":3000")

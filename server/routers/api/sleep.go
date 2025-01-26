@@ -162,35 +162,4 @@ func SetupSleepRoutes(api *gin.RouterGroup) {
 			c.JSON(http.StatusOK, sleeps)
 		})
 	}
-
-	// Public routes (no auth required)
-	public := api.Group("/public/sleep")
-	{
-		public.GET("", func(c *gin.Context) {
-			shareToken := c.Query("babyId") // Using babyId param to maintain frontend compatibility
-			var baby models.Baby
-			if err := database.DB.First(&baby, "share_token = ?", shareToken).Error; err != nil {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
-				return
-			}
-
-			var sleeps []models.Sleep
-			if err := database.DB.Where("baby_id = ?", baby.ID).Find(&sleeps).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-
-			// Convert times to RFC3339 format
-			response := make([]gin.H, len(sleeps))
-			for i, sleep := range sleeps {
-				response[i] = gin.H{
-					"id":     sleep.ID,
-					"start":  sleep.Start.Format(time.RFC3339),
-					"end":    sleep.End.Format(time.RFC3339),
-					"babyId": sleep.BabyID,
-				}
-			}
-			c.JSON(http.StatusOK, response)
-		})
-	}
 }

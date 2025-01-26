@@ -188,7 +188,6 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 	report := api.Group("/report")
 	report.Use(AuthMiddleware()) // Add authentication middleware
 	{
-		// Existing endpoint with date as query parameter
 		report.GET("/:id", func(c *gin.Context) {
 			// Get user from context
 			userInterface, _ := c.Get("user")
@@ -231,7 +230,6 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 			getDailyReport(c, babyID, date)
 		})
 
-		// New endpoint with date in URL path
 		report.GET("/:id/date/:year/:month/:day", func(c *gin.Context) {
 			// Get user from context
 			userInterface, _ := c.Get("user")
@@ -272,7 +270,6 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 			getDailyReport(c, babyID, date)
 		})
 
-		// Weekly report endpoint
 		report.GET("/:id/weekly", func(c *gin.Context) {
 			// Get user from context
 			userInterface, _ := c.Get("user")
@@ -316,7 +313,6 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 			getWeeklyReport(c, babyID, endDate)
 		})
 
-		// get history for specific date
 		report.GET("/:id/history/:date", func(c *gin.Context) {
 			// Get user from context
 			userInterface, _ := c.Get("user")
@@ -350,58 +346,6 @@ func SetupReportRoutes(api *gin.RouterGroup) {
 				return
 			}
 			getDailyReport(c, babyID, date)
-		})
-	}
-
-	// Public routes (no auth required)
-	public := api.Group("/public/report")
-	{
-		public.GET("/:shareToken", func(c *gin.Context) {
-			shareToken := c.Param("shareToken")
-			var baby models.Baby
-			if err := database.DB.First(&baby, "share_token = ?", shareToken).Error; err != nil {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
-				return
-			}
-
-			dateStr := c.Query("date") // expects date in format "2006-01-02"
-			var date time.Time
-			var err error
-			if dateStr == "" {
-				date = time.Now()
-			} else {
-				date, err = time.Parse("2006-01-02", dateStr)
-				if err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Use YYYY-MM-DD"})
-					return
-				}
-			}
-
-			getDailyReport(c, baby.ID, date)
-		})
-
-		public.GET("/:shareToken/weekly", func(c *gin.Context) {
-			shareToken := c.Param("shareToken")
-			var baby models.Baby
-			if err := database.DB.First(&baby, "share_token = ?", shareToken).Error; err != nil {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
-				return
-			}
-
-			dateStr := c.Query("endDate") // optional, defaults to today
-			var endDate time.Time
-			if dateStr == "" {
-				endDate = time.Now()
-			} else {
-				var err error
-				endDate, err = time.Parse("2006-01-02", dateStr)
-				if err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Use YYYY-MM-DD"})
-					return
-				}
-			}
-
-			getWeeklyReport(c, baby.ID, endDate)
 		})
 	}
 }
