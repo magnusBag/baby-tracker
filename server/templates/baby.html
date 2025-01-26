@@ -156,11 +156,26 @@
 
           // Create sleep chart
           const sleepHours = last7Days.map((date) => {
-            const dayData = sleepData.filter((s) => s.start.startsWith(date));
-            return dayData.reduce((total, sleep) => {
-              const start = new Date(sleep.start);
-              const end = new Date(sleep.end);
-              return total + (end - start) / (1000 * 60 * 60);
+            const startOfDay = new Date(date);
+            const endOfDay = new Date(date);
+            endOfDay.setDate(endOfDay.getDate() + 1);
+
+            return sleepData.reduce((total, sleep) => {
+              const sleepStart = new Date(sleep.start);
+              const sleepEnd = new Date(sleep.end);
+
+              // If sleep session is completely outside this day, skip it
+              if (sleepEnd <= startOfDay || sleepStart >= endOfDay) {
+                return total;
+              }
+
+              // Calculate overlap with this day
+              const overlapStart =
+                sleepStart < startOfDay ? startOfDay : sleepStart;
+              const overlapEnd = sleepEnd > endOfDay ? endOfDay : sleepEnd;
+
+              // Add the overlapping duration in hours
+              return total + (overlapEnd - overlapStart) / (1000 * 60 * 60);
             }, 0);
           });
 
