@@ -29,6 +29,8 @@ RUN apk --no-cache add ca-certificates tzdata
 # Copy the binary from builder
 COPY --from=builder /app/main .
 COPY --from=builder /app/.env .
+# Copy templates directory
+COPY --from=builder /app/templates ./templates
 
 # Expose port
 EXPOSE 3000
