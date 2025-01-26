@@ -60,26 +60,30 @@ func main() {
 		c.HTML(http.StatusOK, "baby.html", nil)
 	})
 
-	// Public API routes (no auth required)
-	publicApi := r.Group("/api/public")
-	{
-		api.SetupBabyRoutes(publicApi)
-		api.SetupSleepRoutes(publicApi)
-		api.SetupDiaperRoutes(publicApi)
-		api.SetupNursingRoutes(publicApi)
-		api.SetupReportRoutes(publicApi)
-	}
-
-	// Protected API routes
+	// API routes
 	apiGroup := r.Group("/api")
-	apiGroup.Use(api.AuthMiddleware())
 	{
-		api.SetupUserRoutes(apiGroup)
-		api.SetupSleepRoutes(apiGroup)
-		api.SetupDiaperRoutes(apiGroup)
-		api.SetupBabyRoutes(apiGroup)
-		api.SetupReportRoutes(apiGroup)
-		api.SetupNursingRoutes(apiGroup)
+		// Protected routes
+		protected := apiGroup.Group("")
+		protected.Use(api.AuthMiddleware())
+		{
+			api.SetupUserRoutes(protected)
+			api.SetupSleepRoutes(protected)
+			api.SetupDiaperRoutes(protected)
+			api.SetupBabyRoutes(protected)
+			api.SetupReportRoutes(protected)
+			api.SetupNursingRoutes(protected)
+		}
+
+		// Public routes
+		public := apiGroup.Group("/public")
+		{
+			api.SetupBabyRoutes(public)
+			api.SetupSleepRoutes(public)
+			api.SetupDiaperRoutes(public)
+			api.SetupNursingRoutes(public)
+			api.SetupReportRoutes(public)
+		}
 	}
 
 	r.Run(":3000")
