@@ -703,7 +703,8 @@
           const start = new Date(sleep.start);
           const end = new Date(sleep.end);
           return {
-            startHour: start.getHours() + start.getMinutes() / 60,
+            startHour:
+              ((start.getHours() - 1 + 24) % 24) + start.getMinutes() / 60,
             duration: (end - start) / (1000 * 60 * 60),
             date: start.toISOString().split("T")[0],
           };
@@ -742,7 +743,7 @@
         const feedingTimes = nursingData.map((nursing) => {
           const time = new Date(nursing.time);
           return {
-            hour: time.getHours() + time.getMinutes() / 60,
+            hour: ((time.getHours() - 1 + 24) % 24) + time.getMinutes() / 60,
             date: time.toISOString().split("T")[0],
           };
         });
@@ -774,17 +775,17 @@
         const activities = [
           ...sleepData.map((s) => ({
             type: "sleep",
-            time: new Date(s.start).getHours(),
+            time: (new Date(s.start).getHours() - 1 + 24) % 24,
             date: new Date(s.start).toISOString().split("T")[0],
           })),
           ...nursingData.map((n) => ({
             type: "nursing",
-            time: new Date(n.time).getHours(),
+            time: (new Date(n.time).getHours() - 1 + 24) % 24,
             date: new Date(n.time).toISOString().split("T")[0],
           })),
           ...diaperData.map((d) => ({
             type: "diaper",
-            time: new Date(d.time).getHours(),
+            time: (new Date(d.time).getHours() - 1 + 24) % 24,
             date: new Date(d.time).toISOString().split("T")[0],
           })),
         ];
@@ -865,12 +866,16 @@
         const recentSleep = sleepData.slice(-7);
         const recentNursing = nursingData.slice(-7);
 
-        // Calculate typical day structure
+        // Calculate typical day structure with timezone adjustment
         const wakingHour = Math.round(
-          average(recentSleep.map((s) => new Date(s.start).getHours()))
+          average(
+            recentSleep.map((s) => (new Date(s.start).getHours() - 1 + 24) % 24)
+          )
         );
         const bedtimeHour = Math.round(
-          average(recentSleep.map((s) => new Date(s.end).getHours()))
+          average(
+            recentSleep.map((s) => (new Date(s.end).getHours() - 1 + 24) % 24)
+          )
         );
 
         const feedingsPerDay = Math.round(recentNursing.length / 7);
