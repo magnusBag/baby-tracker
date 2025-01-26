@@ -1,5 +1,7 @@
 include ':app'
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
+include ':bubble-notification-plugin'
+project(':bubble-notification-plugin').projectDir = new File('../bubble-notification-plugin/android')
 
 apply from: 'capacitor.settings.gradle'
