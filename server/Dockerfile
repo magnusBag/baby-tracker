@@ -24,7 +24,7 @@ FROM alpine:latest
 WORKDIR /app
 
 # Install necessary runtime dependencies
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates tzdata curl
 
 # Copy the binary from builder
 COPY --from=builder /app/main .
@@ -34,6 +34,10 @@ COPY --from=builder /app/templates ./templates
 
 # Expose port
 EXPOSE 3000
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
 
 # Run the application
 CMD ["./main"] 

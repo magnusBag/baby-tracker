@@ -35,6 +35,11 @@ func main() {
 		c.Next()
 	})
 
+	// Healthcheck endpoint
+	r.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
+	})
+
 	// Public routes
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
