@@ -157,13 +157,31 @@ func SetupBabyRoutes(api *gin.RouterGroup) {
 				return
 			}
 
-			// Generate new share token if one doesn't exist
-			if baby.ShareToken == "" {
+			// Accept custom share token from request
+			var shareInput struct {
+				ShareToken string `json:"shareToken"`
+			}
+			if err := c.ShouldBindJSON(&shareInput); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			// If no custom token provided, generate a random one
+			if shareInput.ShareToken == "" {
 				baby.ShareToken = uuid.NewString()
-				if err := database.DB.Save(&baby).Error; err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			} else {
+				// Check if the custom token is already in use
+				var existingBaby models.Baby
+				if err := database.DB.Where("share_token = ?", shareInput.ShareToken).First(&existingBaby).Error; err == nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": "Share token already in use"})
 					return
 				}
+				baby.ShareToken = shareInput.ShareToken
+			}
+
+			if err := database.DB.Save(&baby).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
 			}
 
 			c.JSON(http.StatusOK, gin.H{"shareToken": baby.ShareToken})

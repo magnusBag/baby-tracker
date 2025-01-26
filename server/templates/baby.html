@@ -22,7 +22,7 @@
           <div class="flex items-center space-x-4">
             <div id="shareSection" class="hidden">
               <button
-                onclick="generateShareLink()"
+                onclick="openShareModal()"
                 class="text-indigo-600 hover:text-indigo-900"
               >
                 Share
@@ -89,6 +89,25 @@
             <h3 class="text-lg font-medium text-gray-900 mb-4">
               Share Baby Statistics
             </h3>
+            <div class="mb-4">
+              <p class="text-sm text-gray-600 mb-2">
+                Enter a custom share link (optional):
+              </p>
+              <div class="flex items-center space-x-2 mb-4">
+                <input
+                  type="text"
+                  id="customShareToken"
+                  placeholder="e.g., baby-emma-stats"
+                  class="flex-1 p-2 border rounded"
+                />
+                <button
+                  onclick="generateShareLink()"
+                  class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                >
+                  Generate
+                </button>
+              </div>
+            </div>
             <div id="shareLinkContainer" class="mb-4 hidden">
               <p class="text-sm text-gray-600 mb-2">
                 Share this link with family:
@@ -154,14 +173,31 @@
       }
 
       // Share functionality
+      function openShareModal() {
+        document.getElementById("shareModal").classList.remove("hidden");
+      }
+
       function generateShareLink() {
+        const customToken = document.getElementById("customShareToken").value;
+
         fetch(`/api/baby/${babyId}/share`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            shareToken: customToken,
+          }),
         })
-          .then((response) => response.json())
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((data) => {
+                throw new Error(data.error || "Failed to generate share link");
+              });
+            }
+            return response.json();
+          })
           .then((data) => {
             const shareLink = `${window.location.origin}/share/${data.shareToken}`;
             document.getElementById("shareLink").value = shareLink;
@@ -171,11 +207,10 @@
             document
               .getElementById("deleteShareButton")
               .classList.remove("hidden");
-            document.getElementById("shareModal").classList.remove("hidden");
           })
           .catch((error) => {
             console.error("Error generating share link:", error);
-            alert("Error generating share link");
+            alert(error.message);
           });
       }
 
