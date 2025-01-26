@@ -19,10 +19,19 @@
               >Baby Tracker</a
             >
           </div>
-          <div class="flex items-center">
+          <div class="flex items-center space-x-4">
+            <div id="shareSection" class="hidden">
+              <button
+                onclick="generateShareLink()"
+                class="text-indigo-600 hover:text-indigo-900"
+              >
+                Share
+              </button>
+            </div>
             <button
+              id="logoutButton"
               onclick="logout()"
-              class="text-gray-600 hover:text-gray-900"
+              class="text-gray-600 hover:text-gray-900 hidden"
             >
               Logout
             </button>
@@ -70,14 +79,73 @@
             </div>
           </div>
         </div>
+
+        <!-- Share Link Modal -->
+        <div
+          id="shareModal"
+          class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center"
+        >
+          <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">
+              Share Baby Statistics
+            </h3>
+            <div id="shareLinkContainer" class="mb-4 hidden">
+              <p class="text-sm text-gray-600 mb-2">
+                Share this link with family:
+              </p>
+              <div class="flex items-center space-x-2">
+                <input
+                  type="text"
+                  id="shareLink"
+                  readonly
+                  class="flex-1 p-2 border rounded"
+                />
+                <button
+                  onclick="copyShareLink()"
+                  class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+            <div class="flex justify-end space-x-2">
+              <button
+                onclick="deleteShareLink()"
+                id="deleteShareButton"
+                class="text-red-600 hover:text-red-900 px-4 py-2 hidden"
+              >
+                Delete Share Link
+              </button>
+              <button
+                onclick="closeShareModal()"
+                class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
     <script>
-      // Check authentication
+      // Check if we're using a share token or regular auth
+      const shareToken = window.location.pathname.includes("/share/")
+        ? window.location.pathname.split("/share/")[1]
+        : null;
       const token = localStorage.getItem("token");
-      if (!token) {
+      const babyId = shareToken
+        ? null
+        : window.location.pathname.split("/").pop();
+
+      if (!shareToken && !token) {
         window.location.href = "/";
+      }
+
+      // Show/hide UI elements based on auth method
+      if (token) {
+        document.getElementById("logoutButton").classList.remove("hidden");
+        document.getElementById("shareSection").classList.remove("hidden");
       }
 
       function logout() {
@@ -85,27 +153,89 @@
         window.location.href = "/";
       }
 
-      // Get baby ID from URL
-      const babyId = window.location.pathname.split("/").pop();
+      // Share functionality
+      function generateShareLink() {
+        fetch(`/api/baby/${babyId}/share`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const shareLink = `${window.location.origin}/share/${data.shareToken}`;
+            document.getElementById("shareLink").value = shareLink;
+            document
+              .getElementById("shareLinkContainer")
+              .classList.remove("hidden");
+            document
+              .getElementById("deleteShareButton")
+              .classList.remove("hidden");
+            document.getElementById("shareModal").classList.remove("hidden");
+          })
+          .catch((error) => {
+            console.error("Error generating share link:", error);
+            alert("Error generating share link");
+          });
+      }
+
+      function deleteShareLink() {
+        fetch(`/api/baby/${babyId}/share`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then(() => {
+            document
+              .getElementById("shareLinkContainer")
+              .classList.add("hidden");
+            document
+              .getElementById("deleteShareButton")
+              .classList.add("hidden");
+            alert("Share link deleted");
+          })
+          .catch((error) => {
+            console.error("Error deleting share link:", error);
+            alert("Error deleting share link");
+          });
+      }
+
+      function copyShareLink() {
+        const shareLink = document.getElementById("shareLink");
+        shareLink.select();
+        document.execCommand("copy");
+        alert("Link copied to clipboard!");
+      }
+
+      function closeShareModal() {
+        document.getElementById("shareModal").classList.add("hidden");
+      }
 
       // Fetch baby data and create charts
       async function fetchData() {
         try {
-          const headers = {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          };
+          const headers = token
+            ? {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              }
+            : { "Content-Type": "application/json" };
+
+          const baseUrl = shareToken ? `/api/public` : `/api`;
+          const idParam = shareToken ? shareToken : babyId;
 
           const [sleepResponse, diaperResponse, nursingResponse, babyResponse] =
             await Promise.all([
-              fetch(`/api/sleep?babyId=${babyId}`, { headers }),
-              fetch(`/api/diaper?babyId=${babyId}`, { headers }),
-              fetch(`/api/nursing?babyId=${babyId}`, { headers }),
-              fetch(`/api/baby/${babyId}`, { headers }),
+              fetch(`${baseUrl}/sleep?babyId=${idParam}`, { headers }),
+              fetch(`${baseUrl}/diaper?babyId=${idParam}`, { headers }),
+              fetch(`${baseUrl}/nursing?babyId=${idParam}`, { headers }),
+              fetch(`${baseUrl}/baby/${idParam}`, { headers }),
             ]);
 
           // Check for unauthorized responses
           if (
+            !shareToken &&
             [sleepResponse, diaperResponse, nursingResponse, babyResponse].some(
               (r) => r.status === 401
             )
@@ -271,7 +401,7 @@
 
       // Initialize page
       async function initializePage() {
-        if (!token) {
+        if (!shareToken && !token) {
           window.location.href = "/";
           return;
         }

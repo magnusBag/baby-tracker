@@ -36,7 +36,7 @@ func main() {
 	})
 
 	// Public routes
-	r.GET("", func(c *gin.Context) {
+	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
@@ -52,6 +52,11 @@ func main() {
 		c.HTML(http.StatusOK, "dashboard.html", nil)
 	})
 	r.GET("/baby/:id", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "baby.html", nil)
+	})
+
+	// Share route
+	r.GET("/share/:token", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "baby.html", nil)
 	})
 

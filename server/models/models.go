@@ -35,10 +35,11 @@ type User struct {
 }
 
 type Baby struct {
-	ID       string    `json:"id" gorm:"primaryKey"`
-	Name     string    `json:"name"`
-	Parents  []User    `json:"parents,omitempty" gorm:"many2many:user_babies"`
-	Nursings []Nursing `json:"nursings,omitempty" gorm:"foreignKey:BabyID"`
-	Diapers  []Diaper  `json:"diapers,omitempty" gorm:"foreignKey:BabyID"`
-	Sleeps   []Sleep   `json:"sleeps,omitempty" gorm:"foreignKey:BabyID"`
+	ID         string    `json:"id" gorm:"primaryKey"`
+	Name       string    `json:"name"`
+	ShareToken string    `json:"shareToken,omitempty" gorm:"unique"`
+	Parents    []User    `json:"parents,omitempty" gorm:"many2many:user_babies"`
+	Nursings   []Nursing `json:"nursings,omitempty" gorm:"foreignKey:BabyID"`
+	Diapers    []Diaper  `json:"diapers,omitempty" gorm:"foreignKey:BabyID"`
+	Sleeps     []Sleep   `json:"sleeps,omitempty" gorm:"foreignKey:BabyID"`
 }

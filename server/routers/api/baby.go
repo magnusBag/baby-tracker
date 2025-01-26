@@ -132,5 +132,100 @@ func SetupBabyRoutes(api *gin.RouterGroup) {
 
 			c.JSON(http.StatusOK, baby)
 		})
+
+		// Generate share token
+		baby.POST("/:id/share", func(c *gin.Context) {
+			id := c.Param("id")
+
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+
+			var baby models.Baby
+			if err := database.DB.Preload("Parents").First(&baby, "id = ?", id).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
+				return
+			}
+
+			// Check if user has access to this baby
+			hasAccess := false
+			for _, parent := range baby.Parents {
+				if parent.ID == user.ID {
+					hasAccess = true
+					break
+				}
+			}
+
+			if !hasAccess {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access to this baby"})
+				return
+			}
+
+			// Generate new share token if one doesn't exist
+			if baby.ShareToken == "" {
+				baby.ShareToken = uuid.NewString()
+				if err := database.DB.Save(&baby).Error; err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+			}
+
+			c.JSON(http.StatusOK, gin.H{"shareToken": baby.ShareToken})
+		})
+
+		// Remove share token
+		baby.DELETE("/:id/share", func(c *gin.Context) {
+			id := c.Param("id")
+
+			// Get user from context
+			userInterface, _ := c.Get("user")
+			user := userInterface.(models.User)
+
+			var baby models.Baby
+			if err := database.DB.Preload("Parents").First(&baby, "id = ?", id).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
+				return
+			}
+
+			// Check if user has access to this baby
+			hasAccess := false
+			for _, parent := range baby.Parents {
+				if parent.ID == user.ID {
+					hasAccess = true
+					break
+				}
+			}
+
+			if !hasAccess {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "No access to this baby"})
+				return
+			}
+
+			baby.ShareToken = ""
+			if err := database.DB.Save(&baby).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"success": true})
+		})
+	}
+
+	// Public routes (no auth required)
+	public := api.Group("/public/baby")
+	{
+		public.GET("/:shareToken", func(c *gin.Context) {
+			shareToken := c.Param("shareToken")
+			var baby models.Baby
+			if err := database.DB.First(&baby, "share_token = ?", shareToken).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{
+				"id":   baby.ID,
+				"name": baby.Name,
+			})
+		})
 	}
 }
