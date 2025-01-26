@@ -222,10 +222,8 @@ func SetupBabyRoutes(api *gin.RouterGroup) {
 				return
 			}
 
-			c.JSON(http.StatusOK, gin.H{
-				"id":   baby.ID,
-				"name": baby.Name,
-			})
+			// Return the same format as the authenticated endpoint
+			c.JSON(http.StatusOK, baby)
 		})
 	}
 }

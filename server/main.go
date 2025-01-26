@@ -60,6 +60,16 @@ func main() {
 		c.HTML(http.StatusOK, "baby.html", nil)
 	})
 
+	// Public API routes (no auth required)
+	publicApi := r.Group("/api/public")
+	{
+		api.SetupBabyRoutes(publicApi)
+		api.SetupSleepRoutes(publicApi)
+		api.SetupDiaperRoutes(publicApi)
+		api.SetupNursingRoutes(publicApi)
+		api.SetupReportRoutes(publicApi)
+	}
+
 	// Protected API routes
 	apiGroup := r.Group("/api")
 	apiGroup.Use(api.AuthMiddleware())

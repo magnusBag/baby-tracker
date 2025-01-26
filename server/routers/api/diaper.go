@@ -130,4 +130,36 @@ func SetupDiaperRoutes(api *gin.RouterGroup) {
 			c.JSON(http.StatusOK, diaper)
 		})
 	}
+
+	// Public routes (no auth required)
+	public := api.Group("/public/diaper")
+	{
+		public.GET("", func(c *gin.Context) {
+			shareToken := c.Query("babyId") // Using babyId param to maintain frontend compatibility
+			var baby models.Baby
+			if err := database.DB.First(&baby, "share_token = ?", shareToken).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Baby not found"})
+				return
+			}
+
+			var diapers []models.Diaper
+			if err := database.DB.Where("baby_id = ?", baby.ID).Find(&diapers).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			// Convert times to RFC3339 format
+			response := make([]gin.H, len(diapers))
+			for i, diaper := range diapers {
+				response[i] = gin.H{
+					"id":     diaper.ID,
+					"type":   diaper.Type,
+					"time":   diaper.Time.Format(time.RFC3339),
+					"babyId": diaper.BabyID,
+					"note":   diaper.Note,
+				}
+			}
+			c.JSON(http.StatusOK, response)
+		})
+	}
 }
