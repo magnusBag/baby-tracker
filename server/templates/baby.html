@@ -771,46 +771,79 @@
       }
 
       function findActivityCorrelations(sleepData, nursingData, diaperData) {
-        // Convert all times to hours for comparison
+        // Convert all activities to a timeline with timestamps
         const activities = [
           ...sleepData.map((s) => ({
             type: "sleep",
-            time: (new Date(s.start).getHours() - 1 + 24) % 24,
+            time: new Date(s.start).getTime(),
+            endTime: new Date(s.end).getTime(),
+            hour: (new Date(s.start).getHours() - 1 + 24) % 24,
             date: new Date(s.start).toISOString().split("T")[0],
           })),
           ...nursingData.map((n) => ({
             type: "nursing",
-            time: (new Date(n.time).getHours() - 1 + 24) % 24,
+            time: new Date(n.time).getTime(),
+            hour: (new Date(n.time).getHours() - 1 + 24) % 24,
             date: new Date(n.time).toISOString().split("T")[0],
           })),
           ...diaperData.map((d) => ({
             type: "diaper",
-            time: (new Date(d.time).getHours() - 1 + 24) % 24,
+            time: new Date(d.time).getTime(),
+            hour: (new Date(d.time).getHours() - 1 + 24) % 24,
             date: new Date(d.time).toISOString().split("T")[0],
           })),
-        ];
+        ].sort((a, b) => a.time - b.time);
 
-        // Find common sequences
-        const sequences = {};
-        activities.forEach((act, i) => {
+        // Initialize pattern tracking
+        const patterns = {
+          "sleep-after-nursing": { count: 0, total: 0, avgMinutes: 0 },
+          "diaper-after-nursing": { count: 0, total: 0, avgMinutes: 0 },
+          "nursing-after-sleep": { count: 0, total: 0, avgMinutes: 0 },
+          "diaper-after-sleep": { count: 0, total: 0, avgMinutes: 0 },
+        };
+
+        // Analyze patterns within a reasonable time window (3 hours)
+        const TIME_WINDOW = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+
+        activities.forEach((current, i) => {
           if (i === 0) return;
+
           const prev = activities[i - 1];
-          if (act.date === prev.date) {
-            const key = `${prev.type}-${act.type}`;
-            sequences[key] = (sequences[key] || 0) + 1;
+          const timeDiff = current.time - prev.time;
+
+          // Only consider activities within the time window
+          if (timeDiff > TIME_WINDOW) return;
+
+          const pattern = `${current.type}-after-${prev.type}`;
+          if (patterns.hasOwnProperty(pattern)) {
+            patterns[pattern].count++;
+            patterns[pattern].total++;
+            patterns[pattern].avgMinutes = timeDiff / (60 * 1000);
           }
         });
 
-        // Find strongest correlations
-        const correlations = Object.entries(sequences)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 2)
-          .map(([sequence, count]) => {
-            const [first, second] = sequence.split("-");
-            return `${first} is often followed by ${second}`;
-          });
+        // Find significant patterns
+        const significantPatterns = Object.entries(patterns)
+          .filter(([_, data]) => data.count > 0)
+          .sort((a, b) => b[1].count - a[1].count)
+          .map(([pattern, data]) => {
+            const [action, _, trigger] = pattern.split("-");
+            const avgMinutes = Math.round(data.avgMinutes / data.count);
 
-        return correlations;
+            // Format the correlation message
+            if (avgMinutes < 60) {
+              return `${trigger} is often followed by ${action} within ${avgMinutes} minutes`;
+            } else {
+              const hours = Math.floor(avgMinutes / 60);
+              const mins = avgMinutes % 60;
+              return `${trigger} is often followed by ${action} within ${hours}h ${mins}m`;
+            }
+          })
+          .slice(0, 2); // Get top 2 most significant patterns
+
+        return significantPatterns.length > 0
+          ? significantPatterns
+          : ["No significant patterns detected yet"];
       }
 
       function findPatternHighlights(sleepData, nursingData, diaperData) {
@@ -929,6 +962,13 @@
           longestQuiet.start,
           (longestQuiet.start + longestQuiet.length) % 24,
         ];
+      }
+
+      function formatHour(hour) {
+        // Ensure hour is between 0-23
+        hour = (hour + 24) % 24;
+        // Format as HH:00
+        return `${hour.toString().padStart(2, "0")}:00`;
       }
 
       function updateInsights(sleepData, nursingData, diaperData, dateRange) {
