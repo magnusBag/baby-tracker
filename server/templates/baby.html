@@ -46,6 +46,60 @@
           Loading...
         </h1>
 
+        <!-- Date Range Controls -->
+        <div class="mb-6 bg-white p-4 rounded-lg shadow">
+          <div class="flex items-center space-x-4">
+            <div>
+              <label
+                for="dateRange"
+                class="block text-sm font-medium text-gray-700"
+                >Date Range</label
+              >
+              <select
+                id="dateRange"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              >
+                <option value="7">Last 7 days</option>
+                <option value="14">Last 14 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="custom">Custom Range</option>
+              </select>
+            </div>
+            <div id="customDateInputs" class="hidden space-x-4">
+              <div>
+                <label
+                  for="startDate"
+                  class="block text-sm font-medium text-gray-700"
+                  >Start Date</label
+                >
+                <input
+                  type="date"
+                  id="startDate"
+                  class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                />
+              </div>
+              <div>
+                <label
+                  for="endDate"
+                  class="block text-sm font-medium text-gray-700"
+                  >End Date</label
+                >
+                <input
+                  type="date"
+                  id="endDate"
+                  class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                />
+              </div>
+            </div>
+            <button
+              onclick="updateCharts()"
+              class="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Update Charts
+            </button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <!-- Sleep Chart -->
           <div class="bg-white overflow-hidden shadow rounded-lg">
@@ -75,6 +129,136 @@
               </h3>
               <div class="mt-4 h-64">
                 <canvas id="nursingChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Insights Section -->
+        <div class="mt-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">Insights</h2>
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <!-- Sleep Patterns -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                  <svg
+                    class="w-5 h-5 mr-2 text-indigo-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                    />
+                  </svg>
+                  Sleep Patterns
+                </h3>
+                <div id="sleepInsights" class="mt-4 space-y-3">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div class="space-y-3 mt-4">
+                      <div class="h-4 bg-gray-200 rounded"></div>
+                      <div class="h-4 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Feeding Patterns -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                  <svg
+                    class="w-5 h-5 mr-2 text-indigo-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Feeding Patterns
+                </h3>
+                <div id="feedingInsights" class="mt-4 space-y-3">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div class="space-y-3 mt-4">
+                      <div class="h-4 bg-gray-200 rounded"></div>
+                      <div class="h-4 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Activity Correlations -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                  <svg
+                    class="w-5 h-5 mr-2 text-indigo-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  Activity Correlations
+                </h3>
+                <div id="correlationInsights" class="mt-4 space-y-3">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div class="space-y-3 mt-4">
+                      <div class="h-4 bg-gray-200 rounded"></div>
+                      <div class="h-4 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Daily Routine Summary -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="p-5">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                  <svg
+                    class="w-5 h-5 mr-2 text-indigo-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  Daily Routine Summary
+                </h3>
+                <div id="routineInsights" class="mt-4 space-y-3">
+                  <div class="animate-pulse">
+                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div class="space-y-3 mt-4">
+                      <div class="h-4 bg-gray-200 rounded"></div>
+                      <div class="h-4 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -247,9 +431,55 @@
         document.getElementById("shareModal").classList.add("hidden");
       }
 
-      // Fetch baby data and create charts
+      // Get date range based on selection
+      function getDateRange() {
+        const rangeSelect = document.getElementById("dateRange");
+        const selectedValue = rangeSelect.value;
+
+        if (selectedValue === "custom") {
+          const startDate = document.getElementById("startDate").value;
+          const endDate = document.getElementById("endDate").value;
+          if (!startDate || !endDate) {
+            alert("Please select both start and end dates");
+            return null;
+          }
+          return {
+            start: new Date(startDate),
+            end: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+          };
+        }
+
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - parseInt(selectedValue));
+        return { start, end };
+      }
+
+      // Generate array of dates between start and end
+      function getDatesArray(start, end) {
+        const dates = [];
+        const current = new Date(start);
+        while (current <= end) {
+          dates.push(current.toISOString().split("T")[0]);
+          current.setDate(current.getDate() + 1);
+        }
+        return dates;
+      }
+
+      // Show/hide custom date inputs
+      document
+        .getElementById("dateRange")
+        .addEventListener("change", function (e) {
+          const customInputs = document.getElementById("customDateInputs");
+          customInputs.classList.toggle("hidden", e.target.value !== "custom");
+        });
+
+      // Modified fetchData function
       async function fetchData() {
         try {
+          const dateRange = getDateRange();
+          if (!dateRange) return;
+
           const headers = token
             ? {
                 Authorization: `Bearer ${token}`,
@@ -310,17 +540,11 @@
           document.getElementById("babyName").textContent =
             babyData.name + "'s Statistics";
 
-          // Process data for charts
-          const last7Days = [...Array(7)]
-            .map((_, i) => {
-              const d = new Date();
-              d.setDate(d.getDate() - i);
-              return d.toISOString().split("T")[0];
-            })
-            .reverse();
+          // Get dates array for the selected range
+          const datesArray = getDatesArray(dateRange.start, dateRange.end);
 
-          // Create sleep chart
-          const sleepHours = last7Days.map((date) => {
+          // Process sleep data
+          const sleepHours = datesArray.map((date) => {
             const startOfDay = new Date(date);
             const endOfDay = new Date(date);
             endOfDay.setDate(endOfDay.getDate() + 1);
@@ -329,25 +553,23 @@
               const sleepStart = new Date(sleep.start);
               const sleepEnd = new Date(sleep.end);
 
-              // If sleep session is completely outside this day, skip it
               if (sleepEnd <= startOfDay || sleepStart >= endOfDay) {
                 return total;
               }
 
-              // Calculate overlap with this day
               const overlapStart =
                 sleepStart < startOfDay ? startOfDay : sleepStart;
               const overlapEnd = sleepEnd > endOfDay ? endOfDay : sleepEnd;
 
-              // Add the overlapping duration in hours
               return total + (overlapEnd - overlapStart) / (1000 * 60 * 60);
             }, 0);
           });
 
+          // Update sleep chart
           new Chart(document.getElementById("sleepChart"), {
             type: "line",
             data: {
-              labels: last7Days.map((d) => new Date(d).toLocaleDateString()),
+              labels: datesArray.map((d) => new Date(d).toLocaleDateString()),
               datasets: [
                 {
                   label: "Hours of Sleep",
@@ -370,15 +592,16 @@
             },
           });
 
-          // Create diaper chart
-          const diaperCounts = last7Days.map(
+          // Process diaper data
+          const diaperCounts = datesArray.map(
             (date) => diaperData.filter((d) => d.time.startsWith(date)).length
           );
 
+          // Update diaper chart
           new Chart(document.getElementById("diaperChart"), {
             type: "bar",
             data: {
-              labels: last7Days.map((d) => new Date(d).toLocaleDateString()),
+              labels: datesArray.map((d) => new Date(d).toLocaleDateString()),
               datasets: [
                 {
                   label: "Diaper Changes",
@@ -399,15 +622,16 @@
             },
           });
 
-          // Create nursing chart
-          const nursingCounts = last7Days.map(
+          // Process nursing data
+          const nursingCounts = datesArray.map(
             (date) => nursingData.filter((n) => n.time.startsWith(date)).length
           );
 
+          // Update nursing chart
           new Chart(document.getElementById("nursingChart"), {
             type: "bar",
             data: {
-              labels: last7Days.map((d) => new Date(d).toLocaleDateString()),
+              labels: datesArray.map((d) => new Date(d).toLocaleDateString()),
               datasets: [
                 {
                   label: "Nursing Sessions",
@@ -427,11 +651,29 @@
               },
             },
           });
+
+          // Add this after the charts are updated
+          updateInsights(sleepData, nursingData, diaperData, dateRange);
         } catch (error) {
           console.error("Error fetching data:", error);
           document.getElementById("babyName").textContent =
             "Error loading statistics";
         }
+      }
+
+      // Function to update charts
+      function updateCharts() {
+        // Clear existing charts
+        ["sleepChart", "diaperChart", "nursingChart"].forEach((id) => {
+          const canvas = document.getElementById(id);
+          const chart = Chart.getChart(canvas);
+          if (chart) {
+            chart.destroy();
+          }
+        });
+
+        // Fetch new data
+        fetchData();
       }
 
       // Initialize page
@@ -440,7 +682,218 @@
           window.location.href = "/";
           return;
         }
+
+        // Set default date range
+        const today = new Date();
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(today.getDate() - 7);
+
+        document.getElementById("startDate").value = sevenDaysAgo
+          .toISOString()
+          .split("T")[0];
+        document.getElementById("endDate").value = today
+          .toISOString()
+          .split("T")[0];
+
         await fetchData();
+      }
+
+      function analyzeSleepPatterns(sleepData, dateRange) {
+        const sleepTimes = sleepData.map((sleep) => {
+          const start = new Date(sleep.start);
+          const end = new Date(sleep.end);
+          return {
+            startHour: start.getHours() + start.getMinutes() / 60,
+            duration: (end - start) / (1000 * 60 * 60),
+            date: start.toISOString().split("T")[0],
+          };
+        });
+
+        // Find most common sleep start times
+        const timeSlots = {};
+        sleepTimes.forEach((sleep) => {
+          const roundedHour = Math.round(sleep.startHour);
+          timeSlots[roundedHour] = (timeSlots[roundedHour] || 0) + 1;
+        });
+
+        const bestSleepTimes = Object.entries(timeSlots)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 2)
+          .map(([hour]) => formatHour(parseInt(hour)));
+
+        // Calculate average sleep duration
+        const avgDuration =
+          sleepTimes.reduce((sum, sleep) => sum + sleep.duration, 0) /
+          sleepTimes.length;
+
+        // Find longest sleep streak
+        const longestSleep = Math.max(
+          ...sleepTimes.map((sleep) => sleep.duration)
+        );
+
+        return {
+          bestTimes: bestSleepTimes,
+          avgDuration: avgDuration.toFixed(1),
+          longestStreak: longestSleep.toFixed(1),
+        };
+      }
+
+      function analyzeFeedingPatterns(nursingData) {
+        const feedingTimes = nursingData.map((nursing) => {
+          const time = new Date(nursing.time);
+          return {
+            hour: time.getHours() + time.getMinutes() / 60,
+            date: time.toISOString().split("T")[0],
+          };
+        });
+
+        // Find most common feeding times
+        const timeSlots = {};
+        feedingTimes.forEach((feeding) => {
+          const roundedHour = Math.round(feeding.hour);
+          timeSlots[roundedHour] = (timeSlots[roundedHour] || 0) + 1;
+        });
+
+        const commonFeedingTimes = Object.entries(timeSlots)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([hour]) => formatHour(parseInt(hour)));
+
+        // Calculate average feedings per day
+        const dates = [...new Set(feedingTimes.map((f) => f.date))];
+        const avgFeedingsPerDay = feedingTimes.length / dates.length;
+
+        return {
+          commonTimes: commonFeedingTimes,
+          avgPerDay: avgFeedingsPerDay.toFixed(1),
+        };
+      }
+
+      function findActivityCorrelations(sleepData, nursingData, diaperData) {
+        // Convert all times to hours for comparison
+        const activities = [
+          ...sleepData.map((s) => ({
+            type: "sleep",
+            time: new Date(s.start).getHours(),
+            date: new Date(s.start).toISOString().split("T")[0],
+          })),
+          ...nursingData.map((n) => ({
+            type: "nursing",
+            time: new Date(n.time).getHours(),
+            date: new Date(n.time).toISOString().split("T")[0],
+          })),
+          ...diaperData.map((d) => ({
+            type: "diaper",
+            time: new Date(d.time).getHours(),
+            date: new Date(d.time).toISOString().split("T")[0],
+          })),
+        ];
+
+        // Find common sequences
+        const sequences = {};
+        activities.forEach((act, i) => {
+          if (i === 0) return;
+          const prev = activities[i - 1];
+          if (act.date === prev.date) {
+            const key = `${prev.type}-${act.type}`;
+            sequences[key] = (sequences[key] || 0) + 1;
+          }
+        });
+
+        // Find strongest correlations
+        const correlations = Object.entries(sequences)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 2)
+          .map(([sequence, count]) => {
+            const [first, second] = sequence.split("-");
+            return `${first} is often followed by ${second}`;
+          });
+
+        return correlations;
+      }
+
+      function updateInsights(sleepData, nursingData, diaperData, dateRange) {
+        // Analyze sleep patterns
+        const sleepPatterns = analyzeSleepPatterns(sleepData, dateRange);
+        document.getElementById("sleepInsights").innerHTML = `
+          <p class="text-gray-600">Best sleep times appear to be around ${sleepPatterns.bestTimes.join(
+            " and "
+          )}.</p>
+          <p class="text-gray-600">Average sleep duration: ${
+            sleepPatterns.avgDuration
+          } hours</p>
+          <p class="text-gray-600">Longest sleep streak: ${
+            sleepPatterns.longestStreak
+          } hours</p>
+        `;
+
+        // Analyze feeding patterns
+        const feedingPatterns = analyzeFeedingPatterns(nursingData);
+        document.getElementById("feedingInsights").innerHTML = `
+          <p class="text-gray-600">Most common feeding times: ${feedingPatterns.commonTimes.join(
+            ", "
+          )}</p>
+          <p class="text-gray-600">Average feedings per day: ${
+            feedingPatterns.avgPerDay
+          }</p>
+        `;
+
+        // Find correlations
+        const correlations = findActivityCorrelations(
+          sleepData,
+          nursingData,
+          diaperData
+        );
+        document.getElementById("correlationInsights").innerHTML = `
+          <p class="text-gray-600">Pattern detected:</p>
+          <ul class="list-disc list-inside text-gray-600">
+            ${correlations.map((corr) => `<li>${corr}</li>`).join("")}
+          </ul>
+        `;
+
+        // Generate daily routine summary
+        const routineSummary = generateRoutineSummary(
+          sleepData,
+          nursingData,
+          diaperData
+        );
+        document.getElementById("routineInsights").innerHTML = routineSummary;
+      }
+
+      function generateRoutineSummary(sleepData, nursingData, diaperData) {
+        // Analyze recent data to find patterns
+        const recentSleep = sleepData.slice(-7);
+        const recentNursing = nursingData.slice(-7);
+
+        // Calculate typical day structure
+        const wakingHour = Math.round(
+          average(recentSleep.map((s) => new Date(s.start).getHours()))
+        );
+        const bedtimeHour = Math.round(
+          average(recentSleep.map((s) => new Date(s.end).getHours()))
+        );
+
+        const feedingsPerDay = Math.round(recentNursing.length / 7);
+
+        return `
+          <p class="text-gray-600">Typical Day:</p>
+          <ul class="list-disc list-inside text-gray-600 mt-2">
+            <li>Waking around ${formatHour(wakingHour)}</li>
+            <li>~${feedingsPerDay} feedings throughout the day</li>
+            <li>Bedtime around ${formatHour(bedtimeHour)}</li>
+          </ul>
+        `;
+      }
+
+      function average(numbers) {
+        return numbers.reduce((a, b) => a + b, 0) / numbers.length;
+      }
+
+      function formatHour(hour) {
+        // Ensure hour is between 0-23
+        hour = hour % 24;
+        // Format as HH:00
+        return `${hour.toString().padStart(2, "0")}:00`;
       }
 
       initializePage();
