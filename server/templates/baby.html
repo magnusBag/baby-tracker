@@ -35,6 +35,137 @@
     />
 
     <style>
+      /* Dark mode styles */
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f3f4f6;
+        --text-primary: #111827;
+        --text-secondary: #4b5563;
+        --border-color: #e5e7eb;
+        --chart-grid: #e5e7eb;
+        --card-bg: #ffffff;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --hover-bg: #f3f4f6;
+        --indigo-color: #4f46e5;
+      }
+
+      [data-theme="dark"] {
+        --bg-primary: #1a1f2e;
+        --bg-secondary: #111827;
+        --text-primary: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --border-color: #2d3748;
+        --chart-grid: #2d3748;
+        --card-bg: #1f2937;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+        --hover-bg: #374151;
+        --indigo-color: #6366f1;
+      }
+
+      body {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      .bg-white {
+        background-color: var(--card-bg) !important;
+        transition: background-color 0.3s ease;
+      }
+
+      .shadow-lg {
+        box-shadow: 0 10px 15px -3px var(--shadow-color),
+          0 4px 6px -2px var(--shadow-color) !important;
+      }
+
+      .text-gray-900 {
+        color: var(--text-primary) !important;
+      }
+
+      .text-gray-600,
+      .text-gray-500 {
+        color: var(--text-secondary) !important;
+      }
+
+      .text-indigo-600 {
+        color: var(--indigo-color) !important;
+      }
+
+      .hover\:text-indigo-900:hover {
+        color: var(--indigo-color) !important;
+        opacity: 0.8;
+      }
+
+      .border-gray-300 {
+        border-color: var(--border-color) !important;
+      }
+
+      .hover\:bg-gray-100:hover {
+        background-color: var(--hover-bg) !important;
+      }
+
+      /* Chart background colors */
+      [data-theme="dark"] .bg-white.overflow-hidden.shadow.rounded-lg {
+        background-color: var(--card-bg) !important;
+      }
+
+      /* Calendar dark mode styles */
+      [data-theme="dark"] .fc {
+        --fc-page-bg-color: var(--card-bg);
+        --fc-neutral-bg-color: var(--bg-secondary);
+        --fc-neutral-text-color: var(--text-secondary);
+        --fc-border-color: var(--border-color);
+        --fc-button-text-color: var(--text-primary);
+        --fc-button-bg-color: var(--bg-secondary);
+        --fc-button-border-color: var(--border-color);
+        --fc-button-hover-bg-color: var(--hover-bg);
+        --fc-button-hover-border-color: var(--text-secondary);
+        --fc-button-active-bg-color: var(--hover-bg);
+        --fc-button-active-border-color: var(--text-secondary);
+        --fc-event-bg-color: var(--indigo-color);
+        --fc-event-border-color: var(--indigo-color);
+        --fc-event-text-color: #fff;
+        --fc-list-event-hover-bg-color: var(--bg-secondary);
+        --fc-today-bg-color: rgba(99, 102, 241, 0.1);
+      }
+
+      [data-theme="dark"] .fc-theme-standard td,
+      [data-theme="dark"] .fc-theme-standard th {
+        border-color: var(--border-color);
+      }
+
+      [data-theme="dark"] .fc .fc-timegrid-slot {
+        background: var(--card-bg);
+      }
+
+      [data-theme="dark"] .tippy-box {
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+      }
+
+      /* Modal dark mode styles */
+      [data-theme="dark"] #shareModal .bg-white {
+        background-color: var(--card-bg) !important;
+      }
+
+      [data-theme="dark"] input[type="text"],
+      [data-theme="dark"] input[type="date"],
+      [data-theme="dark"] select {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+      }
+
+      [data-theme="dark"] input[type="text"]:focus,
+      [data-theme="dark"] input[type="date"]:focus,
+      [data-theme="dark"] select:focus {
+        border-color: var(--indigo-color);
+        outline: none;
+        ring-color: var(--indigo-color);
+      }
+
+      /* Keep existing styles */
       .fc-event {
         cursor: pointer;
       }
@@ -136,9 +267,55 @@
       .tippy-box[data-theme~="diaper"] {
         border-left: 4px solid rgb(147, 197, 253);
       }
+
+      /* Mobile-friendly calendar styles */
+      @media (max-width: 768px) {
+        .fc .fc-toolbar {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .fc .fc-toolbar-title {
+          font-size: 1.1em;
+          margin: 0;
+        }
+
+        .fc .fc-toolbar-chunk {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+        }
+
+        .fc .fc-button-group {
+          margin: 0;
+        }
+
+        .fc .fc-button {
+          padding: 0.2rem 0.5rem;
+        }
+
+        /* Adjust the header day format for mobile */
+        .fc .fc-col-header-cell-cushion {
+          padding: 4px;
+          font-size: 0.875rem;
+        }
+
+        /* Make time slots more compact on mobile */
+        .fc .fc-timegrid-slot {
+          height: 2em;
+        }
+      }
+
+      /* Ensure the calendar container is responsive */
+      #calendar {
+        width: 100%;
+        min-height: 600px;
+        overflow: hidden;
+      }
     </style>
   </head>
-  <body class="bg-gray-100 min-h-screen">
+  <body class="min-h-screen">
     <nav class="bg-white shadow-lg">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex justify-between h-16">
@@ -148,6 +325,60 @@
             >
           </div>
           <div class="flex items-center space-x-4">
+            <div id="actionButtons" class="hidden space-x-2">
+              <button
+                onclick="openAddModal('sleep')"
+                class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Add Sleep
+              </button>
+              <button
+                onclick="openAddModal('nursing')"
+                class="px-3 py-2 text-sm font-medium text-white bg-red-300 rounded-md hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Add Nursing
+              </button>
+              <button
+                onclick="openAddModal('diaper')"
+                class="px-3 py-2 text-sm font-medium text-white bg-blue-300 rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Add Diaper
+              </button>
+            </div>
+            <button
+              id="darkModeToggle"
+              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+              aria-label="Toggle Dark Mode"
+            >
+              <svg
+                id="darkModeIcon"
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                />
+              </svg>
+              <svg
+                id="lightModeIcon"
+                class="w-6 h-6 hidden"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+            </button>
             <div id="shareSection" class="hidden">
               <button
                 onclick="openShareModal()"
@@ -170,9 +401,14 @@
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
-        <h1 class="text-3xl font-bold text-gray-900 mb-8" id="babyName">
-          Loading...
-        </h1>
+        <div class="flex justify-between items-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900" id="babyName">
+            Loading...
+          </h1>
+          <div class="text-sm text-gray-500">
+            Last updated: <span id="lastUpdated">Just now</span>
+          </div>
+        </div>
 
         <!-- Date Range Controls -->
         <div class="mb-6 bg-white p-4 rounded-lg shadow">
@@ -499,6 +735,117 @@
             </div>
           </div>
         </div>
+
+        <!-- Add Modal -->
+        <div
+          id="addModal"
+          class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50"
+        >
+          <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full">
+            <h3
+              id="addModalTitle"
+              class="text-lg font-medium text-gray-900 mb-4"
+            ></h3>
+            <form id="addForm" class="space-y-4">
+              <!-- Sleep Form Fields -->
+              <div id="sleepFields" class="hidden">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      for="sleepStart"
+                      class="block text-sm font-medium text-gray-700"
+                      >Start Time</label
+                    >
+                    <input
+                      type="datetime-local"
+                      id="sleepStart"
+                      name="sleepStart"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="sleepEnd"
+                      class="block text-sm font-medium text-gray-700"
+                      >End Time</label
+                    >
+                    <input
+                      type="datetime-local"
+                      id="sleepEnd"
+                      name="sleepEnd"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+              <!-- Nursing Form Fields -->
+              <div id="nursingFields" class="hidden">
+                <div>
+                  <label
+                    for="nursingTime"
+                    class="block text-sm font-medium text-gray-700"
+                    >Time</label
+                  >
+                  <input
+                    type="datetime-local"
+                    id="nursingTime"
+                    name="nursingTime"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+              <!-- Diaper Form Fields -->
+              <div id="diaperFields" class="hidden">
+                <div class="space-y-4">
+                  <div>
+                    <label
+                      for="diaperTime"
+                      class="block text-sm font-medium text-gray-700"
+                      >Time</label
+                    >
+                    <input
+                      type="datetime-local"
+                      id="diaperTime"
+                      name="diaperTime"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="diaperType"
+                      class="block text-sm font-medium text-gray-700"
+                      >Type</label
+                    >
+                    <select
+                      id="diaperType"
+                      name="diaperType"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                      <option value="wet">Wet</option>
+                      <option value="dirty">Dirty</option>
+                      <option value="both">Both</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-end space-x-2 mt-4">
+                <button
+                  type="button"
+                  onclick="closeAddModal()"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </main>
 
@@ -520,6 +867,7 @@
       if (token) {
         document.getElementById("logoutButton").classList.remove("hidden");
         document.getElementById("shareSection").classList.remove("hidden");
+        document.getElementById("actionButtons").classList.remove("hidden");
       }
 
       function logout() {
@@ -645,11 +993,54 @@
           customInputs.classList.toggle("hidden", e.target.value !== "custom");
         });
 
+      // Add these at the start of your script section
+      let refreshInterval;
+
+      function formatLastUpdated(date) {
+        return date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        });
+      }
+
+      function updateLastUpdated() {
+        document.getElementById("lastUpdated").textContent = formatLastUpdated(
+          new Date()
+        );
+      }
+
+      function startAutoRefresh() {
+        // Initial update
+        updateLastUpdated();
+
+        // Clear any existing interval
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+        }
+
+        // Set new interval for 11 seconds
+        refreshInterval = setInterval(() => {
+          fetchData().then(() => {
+            updateLastUpdated();
+          });
+        }, 110000); // 110 seconds
+      }
+
       // Modified fetchData function
       async function fetchData() {
         try {
           const dateRange = getDateRange();
           if (!dateRange) return;
+
+          // Destroy existing charts before creating new ones
+          ["sleepChart", "diaperChart", "nursingChart"].forEach((chartId) => {
+            const chart = Chart.getChart(chartId);
+            if (chart) {
+              chart.destroy();
+            }
+          });
 
           const headers = token
             ? {
@@ -736,8 +1127,8 @@
             }, 0);
           });
 
-          // Update sleep chart
-          new Chart(document.getElementById("sleepChart"), {
+          // Create new charts
+          const sleepChart = new Chart(document.getElementById("sleepChart"), {
             type: "line",
             data: {
               labels: datesArray.map((d) => new Date(d).toLocaleDateString()),
@@ -768,66 +1159,75 @@
             (date) => diaperData.filter((d) => d.time.startsWith(date)).length
           );
 
-          // Update diaper chart
-          new Chart(document.getElementById("diaperChart"), {
-            type: "bar",
-            data: {
-              labels: datesArray.map((d) => new Date(d).toLocaleDateString()),
-              datasets: [
-                {
-                  label: "Diaper Changes",
-                  data: diaperCounts,
-                  backgroundColor: "rgb(147, 197, 253)",
-                },
-              ],
-            },
-            options: {
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    stepSize: 1,
+          // Create new charts
+          const diaperChart = new Chart(
+            document.getElementById("diaperChart"),
+            {
+              type: "bar",
+              data: {
+                labels: datesArray.map((d) => new Date(d).toLocaleDateString()),
+                datasets: [
+                  {
+                    label: "Diaper Changes",
+                    data: diaperCounts,
+                    backgroundColor: "rgb(147, 197, 253)",
+                  },
+                ],
+              },
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      stepSize: 1,
+                    },
                   },
                 },
               },
-            },
-          });
+            }
+          );
 
           // Process nursing data
           const nursingCounts = datesArray.map(
             (date) => nursingData.filter((n) => n.time.startsWith(date)).length
           );
 
-          // Update nursing chart
-          new Chart(document.getElementById("nursingChart"), {
-            type: "bar",
-            data: {
-              labels: datesArray.map((d) => new Date(d).toLocaleDateString()),
-              datasets: [
-                {
-                  label: "Nursing Sessions",
-                  data: nursingCounts,
-                  backgroundColor: "rgb(252, 165, 165)",
-                },
-              ],
-            },
-            options: {
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    stepSize: 1,
+          // Create new charts
+          const nursingChart = new Chart(
+            document.getElementById("nursingChart"),
+            {
+              type: "bar",
+              data: {
+                labels: datesArray.map((d) => new Date(d).toLocaleDateString()),
+                datasets: [
+                  {
+                    label: "Nursing Sessions",
+                    data: nursingCounts,
+                    backgroundColor: "rgb(252, 165, 165)",
+                  },
+                ],
+              },
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      stepSize: 1,
+                    },
                   },
                 },
               },
-            },
-          });
+            }
+          );
 
           // Update calendar with the data
           updateCalendar(sleepData, nursingData, diaperData);
 
           // Add this after the charts are updated
           updateInsights(sleepData, nursingData, diaperData, dateRange);
+
+          // After creating new charts, update their theme
+          updateChartsTheme();
         } catch (error) {
           console.error("Error fetching data:", error);
           document.getElementById("babyName").textContent =
@@ -846,8 +1246,10 @@
           }
         });
 
-        // Fetch new data
-        fetchData();
+        // Fetch new data and restart refresh interval
+        fetchData().then(() => {
+          startAutoRefresh();
+        });
       }
 
       // Initialize page
@@ -856,6 +1258,9 @@
           window.location.href = "/";
           return;
         }
+
+        // Initialize dark mode
+        initDarkMode();
 
         // Set default date range
         const today = new Date();
@@ -870,6 +1275,7 @@
           .split("T")[0];
 
         await fetchData();
+        startAutoRefresh(); // Start auto-refresh after initial load
       }
 
       function analyzeSleepPatterns(sleepData, dateRange) {
@@ -1274,15 +1680,28 @@
 
         // Initialize calendar
         window.currentCalendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: "timeGridWeek",
+          initialView: window.innerWidth < 768 ? "timeGridDay" : "timeGridWeek",
           headerToolbar: {
             left: "prev,next today",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           },
+          views: {
+            timeGridWeek: {
+              titleFormat: { year: "numeric", month: "short", day: "numeric" },
+              dayHeaderFormat:
+                window.innerWidth < 768
+                  ? { weekday: "short", day: "numeric" }
+                  : { weekday: "short", month: "numeric", day: "numeric" },
+            },
+            timeGridDay: {
+              titleFormat: { year: "numeric", month: "short", day: "numeric" },
+            },
+          },
           slotMinTime: "06:00:00",
           slotMaxTime: "23:00:00",
           height: "auto",
+          handleWindowResize: true,
           events: events,
           eventDidMount: function (info) {
             let content = "";
@@ -1363,10 +1782,274 @@
           },
         });
 
+        // Handle window resize
+        window.addEventListener("resize", () => {
+          if (window.currentCalendar) {
+            if (window.innerWidth < 768) {
+              window.currentCalendar.setOption("dayHeaderFormat", {
+                weekday: "short",
+                day: "numeric",
+              });
+            } else {
+              window.currentCalendar.setOption("dayHeaderFormat", {
+                weekday: "short",
+                month: "numeric",
+                day: "numeric",
+              });
+            }
+          }
+        });
+
         window.currentCalendar.render();
       }
 
+      // Add dark mode functionality at the start of the script
+      function initDarkMode() {
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const darkModeIcon = document.getElementById("darkModeIcon");
+        const lightModeIcon = document.getElementById("lightModeIcon");
+
+        // Check for saved dark mode preference or system preference
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const savedTheme = localStorage.getItem("theme");
+
+        // Set initial theme
+        if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+          document.documentElement.setAttribute("data-theme", "dark");
+          darkModeIcon.classList.add("hidden");
+          lightModeIcon.classList.remove("hidden");
+        }
+
+        // Toggle dark mode
+        darkModeToggle.addEventListener("click", () => {
+          const isDark =
+            document.documentElement.getAttribute("data-theme") === "dark";
+
+          if (isDark) {
+            document.documentElement.removeAttribute("data-theme");
+            localStorage.setItem("theme", "light");
+            darkModeIcon.classList.remove("hidden");
+            lightModeIcon.classList.add("hidden");
+          } else {
+            document.documentElement.setAttribute("data-theme", "dark");
+            localStorage.setItem("theme", "dark");
+            darkModeIcon.classList.add("hidden");
+            lightModeIcon.classList.remove("hidden");
+          }
+
+          // Update charts with new theme
+          updateChartsTheme();
+
+          // Rerender calendar with new theme
+          if (window.currentCalendar) {
+            window.currentCalendar.render();
+          }
+        });
+      }
+
+      // Add chart theme update function
+      function updateChartsTheme() {
+        const isDark =
+          document.documentElement.getAttribute("data-theme") === "dark";
+        const chartConfig = {
+          scales: {
+            x: {
+              grid: {
+                color: isDark ? "#2d3748" : "#e5e7eb",
+              },
+              ticks: {
+                color: isDark ? "#9ca3af" : "#4b5563",
+              },
+            },
+            y: {
+              grid: {
+                color: isDark ? "#2d3748" : "#e5e7eb",
+              },
+              ticks: {
+                color: isDark ? "#9ca3af" : "#4b5563",
+              },
+              title: {
+                color: isDark ? "#9ca3af" : "#4b5563",
+              },
+            },
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: isDark ? "#f3f4f6" : "#111827",
+              },
+            },
+            title: {
+              color: isDark ? "#f3f4f6" : "#111827",
+            },
+          },
+        };
+
+        ["sleepChart", "diaperChart", "nursingChart"].forEach((chartId) => {
+          const chart = Chart.getChart(chartId);
+          if (chart) {
+            chart.options = { ...chart.options, ...chartConfig };
+            chart.update("none"); // Use 'none' for smoother transitions
+          }
+        });
+      }
+
+      // Handle system dark mode changes
+      function handleSystemDarkModeChange(e) {
+        const savedTheme = localStorage.getItem("theme");
+        // Only auto switch if user hasn't manually set a preference
+        if (!savedTheme) {
+          if (e.matches) {
+            document.documentElement.setAttribute("data-theme", "dark");
+            document.getElementById("darkModeIcon").classList.add("hidden");
+            document.getElementById("lightModeIcon").classList.remove("hidden");
+          } else {
+            document.documentElement.removeAttribute("data-theme");
+            document.getElementById("darkModeIcon").classList.remove("hidden");
+            document.getElementById("lightModeIcon").classList.add("hidden");
+          }
+          updateChartsTheme();
+          if (window.currentCalendar) {
+            window.currentCalendar.render();
+          }
+        }
+      }
+
+      // Add system dark mode listener
+      const darkModeMediaQuery = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      );
+      if (darkModeMediaQuery.addEventListener) {
+        darkModeMediaQuery.addEventListener(
+          "change",
+          handleSystemDarkModeChange
+        );
+      } else {
+        // Fallback for older browsers
+        darkModeMediaQuery.addListener(handleSystemDarkModeChange);
+      }
+
+      // Add these functions before initializePage()
+      let currentModalType = null;
+
+      function openAddModal(type) {
+        currentModalType = type;
+        const modal = document.getElementById("addModal");
+        const title = document.getElementById("addModalTitle");
+
+        // Hide all form fields
+        document.getElementById("sleepFields").classList.add("hidden");
+        document.getElementById("nursingFields").classList.add("hidden");
+        document.getElementById("diaperFields").classList.add("hidden");
+
+        // Show relevant fields and set title
+        switch (type) {
+          case "sleep":
+            title.textContent = "Add Sleep Session";
+            document.getElementById("sleepFields").classList.remove("hidden");
+            // Set default times
+            const now = new Date();
+            const oneHourAgo = new Date(now - 60 * 60 * 1000);
+            document.getElementById("sleepStart").value = oneHourAgo
+              .toISOString()
+              .slice(0, 16);
+            document.getElementById("sleepEnd").value = now
+              .toISOString()
+              .slice(0, 16);
+            break;
+          case "nursing":
+            title.textContent = "Add Nursing Session";
+            document.getElementById("nursingFields").classList.remove("hidden");
+            document.getElementById("nursingTime").value = new Date()
+              .toISOString()
+              .slice(0, 16);
+            break;
+          case "diaper":
+            title.textContent = "Add Diaper Change";
+            document.getElementById("diaperFields").classList.remove("hidden");
+            document.getElementById("diaperTime").value = new Date()
+              .toISOString()
+              .slice(0, 16);
+            break;
+        }
+
+        modal.classList.remove("hidden");
+      }
+
+      function closeAddModal() {
+        document.getElementById("addModal").classList.add("hidden");
+        document.getElementById("addForm").reset();
+        currentModalType = null;
+      }
+
+      // Add form submission handler
+      document
+        .getElementById("addForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          let endpoint = "";
+          let data = {};
+
+          switch (currentModalType) {
+            case "sleep":
+              endpoint = "/api/sleep";
+              data = {
+                babyId: babyId,
+                start: document.getElementById("sleepStart").value,
+                end: document.getElementById("sleepEnd").value,
+              };
+              break;
+            case "nursing":
+              endpoint = "/api/nursing";
+              data = {
+                babyId: babyId,
+                time: document.getElementById("nursingTime").value,
+              };
+              break;
+            case "diaper":
+              endpoint = "/api/diaper";
+              data = {
+                babyId: babyId,
+                time: document.getElementById("diaperTime").value,
+                type: document.getElementById("diaperType").value,
+              };
+              break;
+          }
+
+          try {
+            const response = await fetch(endpoint, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to add entry");
+            }
+
+            // Close modal and refresh data
+            closeAddModal();
+            fetchData();
+          } catch (error) {
+            console.error("Error adding entry:", error);
+            alert("Failed to add entry. Please try again.");
+          }
+        });
+
       initializePage();
+
+      // Add cleanup when user leaves the page
+      window.addEventListener("beforeunload", () => {
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+        }
+      });
     </script>
   </body>
 </html>

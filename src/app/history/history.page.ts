@@ -23,6 +23,8 @@ import {
   IonLabel,
   IonList,
   IonModal,
+  IonRefresher,
+  IonRefresherContent,
   IonRippleEffect,
   IonRow,
   IonTitle,
@@ -71,6 +73,8 @@ import { NursingFormComponent } from "../components/nursing-form/nursing-form.co
     IonAccordionGroup,
     IonAccordion,
     IonRippleEffect,
+    IonRefresher,
+    IonRefresherContent,
   ],
 })
 export class HistoryPage implements ViewWillEnter, ViewDidEnter {
@@ -396,5 +400,13 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
     await form.reset();
     this.selectedNursing.set(undefined);
     await this.nursingModal()?.present();
+  }
+
+  async handleRefresh(event: any) {
+    await this.ionViewWillEnter();
+    //wait 1 second
+    setTimeout(() => {
+      event.target.complete();
+    }, 500);
   }
 }

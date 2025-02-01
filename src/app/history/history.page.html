@@ -1,4 +1,8 @@
 <ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <ion-row>
     <ion-button fill="clear" (click)="goToHome()">
       <ion-icon name="arrow-back-outline"></ion-icon>
