@@ -1263,7 +1263,7 @@
           ...diaperData.map((diaper) => ({
             title: "Diaper Change",
             start: diaper.time,
-            end: new Date(new Date(diaper.time).getTime() + 5 * 60000),
+            end: new Date(new Date(diaper.time).getTime() + 15 * 60000),
             classNames: ["diaper-event"],
             extendedProps: {
               type: "diaper",
