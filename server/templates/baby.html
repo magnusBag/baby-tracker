@@ -9,6 +9,92 @@
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FullCalendar CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/main.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- FullCalendar Bundle (includes all plugins) -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+
+    <!-- Add Tippy.js -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/tippy.js@6/animations/shift-away.css"
+    />
+
+    <style>
+      .fc-event {
+        cursor: pointer;
+      }
+      .sleep-event {
+        background-color: rgb(99, 102, 241) !important;
+        border-color: rgb(99, 102, 241) !important;
+      }
+      .nursing-event {
+        background-color: rgb(252, 165, 165) !important;
+        border-color: rgb(252, 165, 165) !important;
+      }
+      .diaper-event {
+        background-color: rgb(147, 197, 253) !important;
+        border-color: rgb(147, 197, 253) !important;
+      }
+      .fc .fc-timegrid-slot {
+        height: 2.5em;
+      }
+      .fc .fc-toolbar-title {
+        font-size: 1.2em;
+      }
+
+      /* Calendar section transition styles */
+      #calendarSection {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: all 0.3s ease-out;
+        margin-top: 0;
+      }
+
+      #calendarSection.expanded {
+        max-height: inherit;
+        opacity: 1;
+        margin-top: 1rem;
+      }
+
+      /* Tooltip styles */
+      .tippy-box {
+        background-color: white;
+        color: #374151;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .tippy-box[data-theme~="sleep"] {
+        border-left: 4px solid rgb(99, 102, 241);
+      }
+
+      .tippy-box[data-theme~="nursing"] {
+        border-left: 4px solid rgb(252, 165, 165);
+      }
+
+      .tippy-box[data-theme~="diaper"] {
+        border-left: 4px solid rgb(147, 197, 253);
+      }
+    </style>
   </head>
   <body class="bg-gray-100 min-h-screen">
     <nav class="bg-white shadow-lg">
@@ -130,6 +216,49 @@
               <div class="mt-4 h-64">
                 <canvas id="nursingChart"></canvas>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Calendar View before AI Insights Section -->
+        <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <button
+              onclick="toggleCalendar()"
+              class="w-full flex justify-between items-center text-left focus:outline-none"
+            >
+              <h2 class="text-2xl font-bold text-gray-900">Calendar</h2>
+              <svg
+                id="calendarToggleIcon"
+                class="w-6 h-6 transform transition-transform duration-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            <div id="calendarSection">
+              <div class="flex space-x-4 mb-4">
+                <div class="flex items-center">
+                  <div class="w-4 h-4 bg-indigo-600 rounded mr-2"></div>
+                  <span class="text-sm text-gray-600">Sleep</span>
+                </div>
+                <div class="flex items-center">
+                  <div class="w-4 h-4 bg-red-300 rounded mr-2"></div>
+                  <span class="text-sm text-gray-600">Nursing</span>
+                </div>
+                <div class="flex items-center">
+                  <div class="w-4 h-4 bg-blue-300 rounded mr-2"></div>
+                  <span class="text-sm text-gray-600">Diaper Change</span>
+                </div>
+              </div>
+              <div id="calendar" class="min-h-[600px]"></div>
             </div>
           </div>
         </div>
@@ -652,6 +781,9 @@
             },
           });
 
+          // Update calendar with the data
+          updateCalendar(sleepData, nursingData, diaperData);
+
           // Add this after the charts are updated
           updateInsights(sleepData, nursingData, diaperData, dateRange);
         } catch (error) {
@@ -1032,6 +1164,130 @@
               .join("")}
           </div>
         `;
+      }
+
+      function toggleCalendar() {
+        const calendarSection = document.getElementById("calendarSection");
+        const toggleIcon = document.getElementById("calendarToggleIcon");
+        const isExpanded = calendarSection.classList.contains("expanded");
+
+        if (!isExpanded) {
+          calendarSection.classList.add("expanded");
+          toggleIcon.style.transform = "rotate(180deg)";
+          // Re-render calendar when showing to ensure proper sizing
+          setTimeout(() => {
+            if (window.currentCalendar) {
+              window.currentCalendar.render();
+            }
+          }, 300);
+        } else {
+          calendarSection.classList.remove("expanded");
+          toggleIcon.style.transform = "rotate(0deg)";
+        }
+      }
+
+      function updateCalendar(sleepData, nursingData, diaperData) {
+        const calendarEl = document.getElementById("calendar");
+
+        // Destroy existing calendar instance if it exists
+        if (window.currentCalendar) {
+          window.currentCalendar.destroy();
+        }
+
+        // Convert data to calendar events
+        const events = [
+          ...sleepData.map((sleep) => ({
+            title: "Sleep",
+            start: sleep.start,
+            end: sleep.end,
+            classNames: ["sleep-event"],
+            extendedProps: {
+              type: "sleep",
+              duration: `${(
+                (new Date(sleep.end) - new Date(sleep.start)) /
+                (1000 * 60 * 60)
+              ).toFixed(1)} hours`,
+            },
+          })),
+          ...nursingData.map((nursing) => ({
+            title: "Nursing",
+            start: nursing.time,
+            end: new Date(new Date(nursing.time).getTime() + 30 * 60000),
+            classNames: ["nursing-event"],
+            extendedProps: {
+              type: "nursing",
+            },
+          })),
+          ...diaperData.map((diaper) => ({
+            title: "Diaper Change",
+            start: diaper.time,
+            end: new Date(new Date(diaper.time).getTime() + 15 * 60000),
+            classNames: ["diaper-event"],
+            extendedProps: {
+              type: "diaper",
+              details: diaper.type,
+            },
+          })),
+        ];
+
+        // Initialize calendar
+        window.currentCalendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: "timeGridWeek",
+          headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
+          },
+          slotMinTime: "06:00:00",
+          slotMaxTime: "23:00:00",
+          height: "auto",
+          events: events,
+          eventDidMount: function (info) {
+            let content = "";
+            const startTime = info.event.start.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+            switch (info.event.extendedProps.type) {
+              case "sleep":
+                content = `
+                  <div class="font-medium">${info.event.title}</div>
+                  <div>Start: ${startTime}</div>
+                  <div>Duration: ${info.event.extendedProps.duration}</div>
+                `;
+                break;
+              case "nursing":
+                content = `
+                  <div class="font-medium">${info.event.title}</div>
+                  <div>Time: ${startTime}</div>
+                `;
+                break;
+              case "diaper":
+                content = `
+                  <div class="font-medium">${info.event.title}</div>
+                  <div>Time: ${startTime}</div>
+                  <div>Type: ${info.event.extendedProps.details}</div>
+                `;
+                break;
+            }
+
+            tippy(info.el, {
+              content: content,
+              allowHTML: true,
+              theme: info.event.extendedProps.type,
+              placement: "top",
+              animation: "shift-away",
+              interactive: true,
+            });
+          },
+          nowIndicator: true,
+          scrollTime: "07:00:00",
+          slotDuration: "00:30:00",
+          allDaySlot: false,
+        });
+
+        window.currentCalendar.render();
       }
 
       initializePage();
