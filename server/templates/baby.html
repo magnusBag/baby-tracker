@@ -1698,8 +1698,8 @@
               titleFormat: { year: "numeric", month: "short", day: "numeric" },
             },
           },
-          slotMinTime: "06:00:00",
-          slotMaxTime: "23:00:00",
+          slotMinTime: "00:00:00",
+          slotMaxTime: "24:00:00",
           height: "auto",
           handleWindowResize: true,
           events: events,
@@ -1993,27 +1993,40 @@
           let endpoint = "";
           let data = {};
 
+          // Helper function to format datetime-local to RFC3339
+          function formatToRFC3339(dateStr) {
+            const date = new Date(dateStr);
+            return date.toISOString();
+          }
+
           switch (currentModalType) {
             case "sleep":
               endpoint = "/api/sleep";
               data = {
                 babyId: babyId,
-                start: document.getElementById("sleepStart").value,
-                end: document.getElementById("sleepEnd").value,
+                start: formatToRFC3339(
+                  document.getElementById("sleepStart").value
+                ),
+                end: formatToRFC3339(document.getElementById("sleepEnd").value),
               };
               break;
             case "nursing":
               endpoint = "/api/nursing";
               data = {
                 babyId: babyId,
-                time: document.getElementById("nursingTime").value,
+                time: formatToRFC3339(
+                  document.getElementById("nursingTime").value
+                ),
+                type: "nursing", // Add default type
               };
               break;
             case "diaper":
               endpoint = "/api/diaper";
               data = {
                 babyId: babyId,
-                time: document.getElementById("diaperTime").value,
+                time: formatToRFC3339(
+                  document.getElementById("diaperTime").value
+                ),
                 type: document.getElementById("diaperType").value,
               };
               break;
@@ -2030,7 +2043,8 @@
             });
 
             if (!response.ok) {
-              throw new Error("Failed to add entry");
+              const errorData = await response.json();
+              throw new Error(errorData.error || "Failed to add entry");
             }
 
             // Close modal and refresh data
@@ -2038,7 +2052,7 @@
             fetchData();
           } catch (error) {
             console.error("Error adding entry:", error);
-            alert("Failed to add entry. Please try again.");
+            alert(error.message || "Failed to add entry. Please try again.");
           }
         });
 
