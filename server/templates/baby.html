@@ -72,6 +72,19 @@
         margin-top: 1rem;
       }
 
+      /* Calendar styles */
+      .fc-timegrid-event {
+        z-index: 1 !important;
+      }
+
+      .fc-timegrid-col-events {
+        z-index: 1 !important;
+      }
+
+      .fc .fc-popover {
+        z-index: 100 !important;
+      }
+
       /* Tooltip styles */
       .tippy-box {
         background-color: white;
@@ -81,6 +94,35 @@
         border-radius: 0.375rem;
         padding: 0.5rem;
         font-size: 0.875rem;
+      }
+
+      /* Force tooltips to be rendered at the highest level */
+      #calendar {
+        position: relative;
+      }
+
+      .tippy-box[data-theme~="sleep"],
+      .tippy-box[data-theme~="nursing"],
+      .tippy-box[data-theme~="diaper"] {
+        position: relative;
+        z-index: 1000000 !important;
+      }
+
+      /* Ensure tooltip container is above calendar events */
+      .tippy-box[data-animation="shift-away"][data-state="visible"] {
+        z-index: 10000 !important;
+      }
+
+      /* Ensure the tooltip backdrop is above calendar events */
+      .tippy-box[data-animation="shift-away"][data-state="visible"]
+        .tippy-backdrop {
+        z-index: 10000 !important;
+      }
+
+      /* Make sure the content container is also above calendar */
+      .tippy-content {
+        z-index: 10000 !important;
+        position: relative;
       }
 
       .tippy-box[data-theme~="sleep"] {
@@ -1221,7 +1263,7 @@
           ...diaperData.map((diaper) => ({
             title: "Diaper Change",
             start: diaper.time,
-            end: new Date(new Date(diaper.time).getTime() + 15 * 60000),
+            end: new Date(new Date(diaper.time).getTime() + 5 * 60000),
             classNames: ["diaper-event"],
             extendedProps: {
               type: "diaper",
@@ -1279,6 +1321,24 @@
               placement: "top",
               animation: "shift-away",
               interactive: true,
+              appendTo: document.body, // Force tooltips to be rendered at body level
+              zIndex: 1000000,
+              popperOptions: {
+                modifiers: [
+                  {
+                    name: "preventOverflow",
+                    options: {
+                      boundary: "viewport",
+                    },
+                  },
+                  {
+                    name: "flip",
+                    options: {
+                      fallbackPlacements: ["bottom", "right", "left"],
+                    },
+                  },
+                ],
+              },
             });
           },
           nowIndicator: true,
