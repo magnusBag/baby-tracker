@@ -1254,7 +1254,7 @@
           ...nursingData.map((nursing) => ({
             title: "Nursing",
             start: nursing.time,
-            end: new Date(new Date(nursing.time).getTime() + 30 * 60000),
+            end: new Date(new Date(nursing.time).getTime() + 15 * 60000),
             classNames: ["nursing-event"],
             extendedProps: {
               type: "nursing",
