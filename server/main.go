@@ -4,6 +4,7 @@ import (
 	"baby-tracker/database"
 	"baby-tracker/routers/api"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,6 +59,17 @@ func main() {
 	})
 	r.GET("/baby/:id", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "baby.html", nil)
+	})
+
+	// Serve Angular app
+	r.Static("/app", "./www/browser")
+
+	// Handle Angular app routes - this needs to come after other specific routes
+	r.NoRoute(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/app/") {
+			c.File("./www/browser/index.html")
+			return
+		}
 	})
 
 	// Share route

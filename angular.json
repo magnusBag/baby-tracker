@@ -38,7 +38,8 @@
           },
           "configurations": {
             "server": {
-              "outputPath": "server",
+              "baseHref": "/app/",
+              "outputPath": "server/www",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

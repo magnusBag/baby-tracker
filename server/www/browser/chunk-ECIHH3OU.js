@@ -1,0 +1,1 @@
+import{Ja as n,wb as i}from"./chunk-DMKK32ZK.js";import"./chunk-RW4GY4BD.js";var a=(()=>{let e=class e{};e.\u0275fac=function(o){return new(o||e)},e.\u0275cmp=n({type:e,selectors:[["app-history-solo"]],decls:1,vars:0,template:function(o,s){o&1&&i(0," pee pee poo poo ")},encapsulation:2});let t=e;return t})();export{a as HistorySoloPage};
