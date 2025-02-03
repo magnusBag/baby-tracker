@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "https://baby-tracker.solita.uk/api",
+  apiUrl: "https://baby-tracker.bolab.dk/api",
 };

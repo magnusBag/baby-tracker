@@ -26,12 +26,33 @@ export class AuthService {
         private headersService: HeadersService,
     ) {}
 
+    private async validateToken(token: string): Promise<boolean> {
+        try {
+            const response = await CapacitorHttp.get({
+                url: `${environment.apiUrl}/baby`,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            return response.status === 200;
+        } catch (error) {
+            console.error("Token validation failed:", error);
+            return false;
+        }
+    }
+
     async checkAuthentication(): Promise<boolean> {
         const token = await this.headersService.getStoredToken();
         if (token) {
-            // TODO: Validate token with backend if needed
-            this.isAuthenticated.next(true);
-            return true;
+            // Validate token with backend
+            const isValid = await this.validateToken(token);
+            if (isValid) {
+                this.isAuthenticated.next(true);
+                return true;
+            }
+            // Token is invalid, remove it
+            await this.headersService.removeToken();
         }
 
         // Try auto-login with device ID
