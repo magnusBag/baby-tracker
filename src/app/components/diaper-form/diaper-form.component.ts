@@ -30,6 +30,9 @@ import { DiaperInput, DiaperType } from "../models";
 import { addTimezoneOffset, now } from "../util";
 import { BabyService } from "src/app/services/baby.service";
 import { BabiesListComponent } from "../babies-list/babies-list.component";
+import { DatePicker } from "@capacitor-community/date-picker";
+import { TimeStyleService } from "src/app/services/time-style.service";
+import { DarkModeService } from "src/app/services/dark-mode.service";
 
 @Component({
   selector: "app-diaper-form",
@@ -48,6 +51,7 @@ import { BabiesListComponent } from "../babies-list/babies-list.component";
     <form [formGroup]="form" class="ion-padding">
       <ion-item>
         <ion-label>Diaper Time</ion-label>
+        @if(timeStyleService.timeStyle() === 'number') {
         <ion-input
           type="tel"
           inputmode="numeric"
@@ -57,7 +61,16 @@ import { BabiesListComponent } from "../babies-list/babies-list.component";
           placeholder="HH:mm"
           maxlength="5"
         ></ion-input>
+        } @else {
+        <ion-button fill="clear" (click)="openDatePicker()">{{form.value.time}}</ion-button>
+        }
       </ion-item>
+      <div class="quick-time-buttons">
+        <ion-button size="small" (click)="setQuickTime(30)">{{getTimeString(30)}}</ion-button>
+        <ion-button size="small" (click)="setQuickTime(20)">{{getTimeString(20)}}</ion-button>
+        <ion-button size="small" (click)="setQuickTime(15)">{{getTimeString(15)}}</ion-button>
+        <ion-button size="small" (click)="setQuickTime(10)">{{getTimeString(10)}}</ion-button>
+      </div>
       <ion-segment formControlName="type" class="ion-padding-top">
         <ion-segment-button value="wet">
           <div class="dot wet"></div>
@@ -90,9 +103,20 @@ import { BabiesListComponent } from "../babies-list/babies-list.component";
       --padding-start: 8px;
       --padding-end: 8px;
     }
+    .quick-time-buttons {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px;
+    }
+    .quick-time-buttons ion-button {
+      flex: 1;
+      font-size: 12px;
+    }
   `],
 })
 export class DiaperFormComponent {
+  timeStyleService = inject(TimeStyleService);
+  darkModeService = inject(DarkModeService);
   babyService = inject(BabyService);
   form = new FormGroup({
     type: new FormControl<DiaperType>("both"),
@@ -113,12 +137,15 @@ export class DiaperFormComponent {
   reset() {
     this.form.reset();
     this.form.patchValue({ type: "both" });
-    this.time.set(now());
+    const defaultTime = new Date();
+    defaultTime.setMinutes(defaultTime.getMinutes() - 5);
+    const roundedTime = this.roundToNearestFiveMinutes(defaultTime);
+    this.time.set(roundedTime);
     this.note.set(undefined);
     this.id.set(undefined);
     this.babiesList()?.refresh();
     this.form.patchValue({
-      time: now().toISOString().slice(11, 16),
+      time: roundedTime.toISOString().slice(11, 16),
     });
   }
 
@@ -197,6 +224,50 @@ export class DiaperFormComponent {
   }
 
   clearTime() {
-    this.form.get("time")?.setValue("", { emitEvent: false });
+    //only remove last 2 characters
+    const time = this.form.get("time")?.value;
+    if (time) {
+      this.form.get("time")?.setValue(time.slice(0, -2), { emitEvent: false });
+    }
+  }
+
+  async openDatePicker() {
+    const result = await DatePicker.present({
+      mode: 'time',
+      locale: 'en-GB',
+      is24h: true,
+      theme: this.darkModeService.isDarkMode() ? 'dark' : 'light',
+    });
+    if (result.value) {
+      const value = result.value.substring(11, 16);
+      this.form.get("time")?.setValue(value, { emitEvent: false });
+    }
+  }
+
+  private roundToNearestFiveMinutes(date: Date): Date {
+    const roundedDate = new Date(date);
+    const minutes = roundedDate.getMinutes();
+    const remainder = minutes % 5;
+    if (remainder >= 2.5) {
+      roundedDate.setMinutes(minutes + (5 - remainder));
+    } else {
+      roundedDate.setMinutes(minutes - remainder);
+    }
+    return roundedDate;
+  }
+
+  getTimeString(minutesAgo: number): string {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - minutesAgo);
+    const roundedTime = this.roundToNearestFiveMinutes(now);
+    return `${roundedTime.getHours().toString().padStart(2, "0")}:${roundedTime.getMinutes().toString().padStart(2, "0")}`;
+  }
+
+  setQuickTime(minutesAgo: number) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - minutesAgo);
+    const roundedTime = this.roundToNearestFiveMinutes(now);
+    const timeString = `${roundedTime.getHours().toString().padStart(2, "0")}:${roundedTime.getMinutes().toString().padStart(2, "0")}`;
+    this.form.get("time")?.setValue(timeString, { emitEvent: false });
   }
 }

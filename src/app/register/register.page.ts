@@ -28,13 +28,13 @@ import { CommonModule } from "@angular/common";
     selector: "app-register",
     template: `
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-title>{{ selectedSegment === 'register' ? 'Register' : 'Login' }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
-      <ion-segment [(ngModel)]="selectedSegment" class="ion-margin-bottom">
+    <ion-content class="ion-padding" color="light">
+      <ion-segment [(ngModel)]="selectedSegment" class="ion-margin-bottom" color="primary">
         <ion-segment-button value="register">
           Register
         </ion-segment-button>
@@ -43,20 +43,21 @@ import { CommonModule } from "@angular/common";
         </ion-segment-button>
       </ion-segment>
 
-      <ion-card>
+      <ion-card class="auth-card">
         <ion-card-content>
           <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
-            <ion-item>
+            <ion-item lines="full">
               <ion-label position="floating">Username</ion-label>
-              <ion-input type="text" formControlName="username"></ion-input>
+              <ion-input type="text" formControlName="username" class="custom-input"></ion-input>
             </ion-item>
 
-            <ion-item>
+            <ion-item lines="full">
               <ion-label position="floating">Password</ion-label>
-              <ion-input type="password" formControlName="password"></ion-input>
+              <ion-input type="password" formControlName="password" class="custom-input"></ion-input>
             </ion-item>
 
-            <ion-button expand="block" type="submit" [disabled]="!authForm.valid" class="ion-margin-top">
+            <ion-button expand="block" type="submit" [disabled]="!authForm.valid" 
+                      class="ion-margin-top" color="primary">
               {{ selectedSegment === 'register' ? 'Register' : 'Login' }}
             </ion-button>
           </form>
@@ -64,6 +65,48 @@ import { CommonModule } from "@angular/common";
       </ion-card>
     </ion-content>
   `,
+    styles: [`
+      :host {
+        display: block;
+      }
+      
+      .auth-card {
+        max-width: 500px;
+        margin: 0 auto;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(var(--ion-color-dark-rgb), 0.1);
+      }
+
+      ion-item {
+        --background: transparent;
+        --border-color: var(--ion-color-medium);
+        margin-bottom: 16px;
+      }
+
+      ion-input {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        --border-radius: 8px;
+      }
+
+      ion-button {
+        --border-radius: 8px;
+        margin-top: 24px;
+        font-weight: 600;
+      }
+
+      ion-segment {
+        --background: var(--ion-color-light);
+        border-radius: 8px;
+        margin-bottom: 24px;
+      }
+
+      ion-segment-button {
+        --indicator-color: var(--ion-color-primary);
+        --color: var(--ion-color-medium);
+        --color-checked: var(--ion-color-primary);
+      }
+    `],
     standalone: true,
     imports: [
         CommonModule,

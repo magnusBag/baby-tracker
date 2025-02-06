@@ -19,7 +19,7 @@ public class bubbleNotificationPluginPlugin: CAPPlugin {
             if granted {
                 let content = UNMutableNotificationContent()
                 content.title = title
-                content.body = content
+                content.body = "test"
                 content.sound = UNNotificationSound.default
                 
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)

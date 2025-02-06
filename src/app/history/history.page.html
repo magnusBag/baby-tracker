@@ -12,126 +12,146 @@
       'dd/MM/yy' }}</ion-title
     >
   </ion-row>
-
-  <ion-accordion-group [multiple]="true" #accordionGroup>
-    <ion-accordion [value]="'sleep'">
-      <ion-item slot="header">
-        <ion-label
-          >Sleep: {{ totalSleepDuration() | number : '1.0-2' }} hours</ion-label
-        >
-      </ion-item>
-
-      <ion-list slot="content" inset="true">
-        <ion-item *ngFor="let sleep of sleeps()" class="ion-activatable">
-          <ion-ripple-effect></ion-ripple-effect>
-          <ion-label (click)="editSleep(sleep)">
-            {{ sleep.start | date : 'HH:mm' }} - {{ sleep.end | date : 'HH:mm'
-            }} - ({{ calculateDurationInHours(sleep.start, sleep.end) | number :
-            '1.0-2' }} hours)
-          </ion-label>
-          <ion-button fill="clear" slot="end" (click)="editSleep(sleep)">
-            <ion-icon name="pencil-outline"></ion-icon>
-          </ion-button>
-          <ion-button
-            fill="clear"
-            slot="end"
-            color="danger"
-            (click)="showDeleteSleepAlert(sleep)"
+  <div style="grid-template-columns: 1fr">
+    <ion-accordion-group [multiple]="true" #accordionGroup>
+      <ion-accordion [value]="'sleep'">
+        <ion-item slot="header">
+          <ion-label
+            >Sleep: {{ totalSleepDuration() | number : '1.0-2' }}
+            hours</ion-label
           >
-            <ion-icon name="trash-outline"></ion-icon>
-          </ion-button>
         </ion-item>
-        <ion-item>
-          <ion-button fill="clear" expand="block" (click)="addNewSleep()">
-            <ion-icon color="primary" name="add-outline"></ion-icon>
-            Add New Sleep
-          </ion-button>
-        </ion-item>
-      </ion-list>
-    </ion-accordion>
 
-    <ion-accordion [value]="'diapers'">
-      <ion-item slot="header">
-        <ion-label>Diapers: {{ diapers().length }}</ion-label>
-      </ion-item>
+        <ion-list slot="content" inset="true">
+          <ion-item *ngFor="let sleep of sleeps()" class="ion-activatable">
+            <ion-ripple-effect></ion-ripple-effect>
+            <ion-label (click)="editSleep(sleep)">
+              {{ sleep.start | date : 'HH:mm' }} - {{ sleep.end | date : 'HH:mm'
+              }} - ({{ calculateDurationInHours(sleep.start, sleep.end) | number
+              : '1.0-2' }} hours)
+              <div *ngIf="sleep.note" class="note-text">
+                Note: {{ sleep.note }}
+              </div>
+            </ion-label>
+            <ion-button fill="clear" slot="end" (click)="editSleep(sleep)">
+              <ion-icon name="pencil-outline"></ion-icon>
+            </ion-button>
+            <ion-button
+              fill="clear"
+              slot="end"
+              color="danger"
+              (click)="showDeleteSleepAlert(sleep)"
+            >
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+          <ion-item>
+            <ion-button fill="clear" expand="block" (click)="addNewSleep()">
+              <ion-icon color="primary" name="add-outline"></ion-icon>
+              Add New Sleep
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-accordion>
 
-      <ion-list slot="content" inset="true">
-        <ion-item *ngFor="let diaper of diapers()" class="ion-activatable">
-          <ion-ripple-effect></ion-ripple-effect>
-          <ion-label (click)="editDiaper(diaper)">
-            {{ diaper.time | date : 'HH:mm' : 'da-DK' }} - ({{ diaper.type }})
-          </ion-label>
-          <ion-button fill="clear" slot="end" (click)="editDiaper(diaper)">
-            <ion-icon name="pencil-outline"></ion-icon>
-          </ion-button>
-          <ion-button
-            fill="clear"
-            slot="end"
-            color="danger"
-            (click)="showDeleteDiaperAlert(diaper)"
-          >
-            <ion-icon name="trash-outline"></ion-icon>
-          </ion-button>
+      <ion-accordion [value]="'diapers'">
+        <ion-item slot="header">
+          <ion-label>Diapers: {{ diapers().length }}</ion-label>
         </ion-item>
-        <ion-item>
-          <ion-button fill="clear" expand="block" (click)="addNewDiaper()">
-            <ion-icon color="primary" name="add-outline"></ion-icon>
-            Add New Diaper
-          </ion-button>
-        </ion-item>
-      </ion-list>
-    </ion-accordion>
 
-    <ion-accordion [value]="'nursings'">
-      <ion-item slot="header">
-        <ion-label>Nursings: {{ nursings().length }}</ion-label>
-      </ion-item>
+        <ion-list slot="content" inset="true">
+          <ion-item *ngFor="let diaper of diapers()" class="ion-activatable">
+            <ion-ripple-effect></ion-ripple-effect>
+            <ion-label (click)="editDiaper(diaper)">
+              {{ diaper.time | date : 'HH:mm' : 'da-DK' }} - ({{ diaper.type }})
+              <div *ngIf="diaper.note" class="note-text">
+                Note: {{ diaper.note }}
+              </div>
+            </ion-label>
+            <ion-button fill="clear" slot="end" (click)="editDiaper(diaper)">
+              <ion-icon name="pencil-outline"></ion-icon>
+            </ion-button>
+            <ion-button
+              fill="clear"
+              slot="end"
+              color="danger"
+              (click)="showDeleteDiaperAlert(diaper)"
+            >
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+          <ion-item>
+            <ion-button fill="clear" expand="block" (click)="addNewDiaper()">
+              <ion-icon color="primary" name="add-outline"></ion-icon>
+              Add New Diaper
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-accordion>
 
-      <ion-list slot="content" inset="true">
-        <ion-item *ngFor="let nursing of nursings()" class="ion-activatable">
-          <ion-ripple-effect></ion-ripple-effect>
-          <ion-label (click)="editNursing(nursing)">
-            {{ nursing.time | date : 'HH:mm' : 'da-DK' }} - ({{ nursing.type }})
-          </ion-label>
-          <ion-button fill="clear" slot="end" (click)="editNursing(nursing)">
-            <ion-icon name="pencil-outline"></ion-icon>
-          </ion-button>
-          <ion-button
-            fill="clear"
-            slot="end"
-            color="danger"
-            (click)="showDeleteNursingAlert(nursing)"
-          >
-            <ion-icon name="trash-outline"></ion-icon>
-          </ion-button>
+      <ion-accordion [value]="'nursings'">
+        <ion-item slot="header">
+          <ion-label>Nursings: {{ nursings().length }}</ion-label>
         </ion-item>
-        <ion-item>
-          <ion-button fill="clear" expand="block" (click)="addNewNursing()">
-            <ion-icon color="primary" name="add-outline"></ion-icon>
-            Add New Nursing
-          </ion-button>
-        </ion-item>
-      </ion-list>
-    </ion-accordion>
-  </ion-accordion-group>
 
-  <!--   prev and next day buttons -->
-  <div
-    style="display: flex; justify-content: space-between; align-items: center"
-  >
-    <ion-button fill="clear" expand="block" (click)="previousDay()">
-      <ion-icon name="arrow-back-outline"></ion-icon>
-    </ion-button>
-    <ion-button fill="clear" expand="block" (click)="nextDay()">
-      <ion-icon name="arrow-forward-outline"></ion-icon>
-    </ion-button>
+        <ion-list slot="content" inset="true">
+          <ion-item *ngFor="let nursing of nursings()" class="ion-activatable">
+            <ion-ripple-effect></ion-ripple-effect>
+            <ion-label (click)="editNursing(nursing)">
+              {{ nursing.time | date : 'HH:mm' : 'da-DK' }} - ({{ nursing.type
+              }})
+              <div *ngIf="nursing.note" class="note-text">
+                Note: {{ nursing.note }}
+              </div>
+            </ion-label>
+            <ion-button fill="clear" slot="end" (click)="editNursing(nursing)">
+              <ion-icon name="pencil-outline"></ion-icon>
+            </ion-button>
+            <ion-button
+              fill="clear"
+              slot="end"
+              color="danger"
+              (click)="showDeleteNursingAlert(nursing)"
+            >
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+          <ion-item>
+            <ion-button fill="clear" expand="block" (click)="addNewNursing()">
+              <ion-icon color="primary" name="add-outline"></ion-icon>
+              Add New Nursing
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-accordion>
+    </ion-accordion-group>
+
+    <!--   prev and next day buttons -->
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: fixed;
+        bottom: 0;
+        left: 5px;
+        width: 100%;
+      "
+    >
+      <ion-button fill="clear" expand="block" (click)="previousDay()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" expand="block" (click)="nextDay()">
+        <ion-icon name="arrow-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
   </div>
 
   <!-- Edit Modals -->
   <ion-modal
     #sleepModal
-    [breakpoints]="[0, 0.6, 0.75, 1]"
-    [initialBreakpoint]="0.6"
+    [breakpoints]="[0, 0.75, 1]"
+    [initialBreakpoint]="0.75"
     [keepContentsMounted]="true"
     (willDismiss)="sleepForm()!.reset()"
   >
@@ -147,8 +167,8 @@
 
   <ion-modal
     #diaperModal
-    [breakpoints]="[0, 0.6, 0.75, 1]"
-    [initialBreakpoint]="0.6"
+    [breakpoints]="[0, 0.75, 1]"
+    [initialBreakpoint]="0.75"
     [keepContentsMounted]="true"
     (willDismiss)="diaperForm()!.reset()"
   >

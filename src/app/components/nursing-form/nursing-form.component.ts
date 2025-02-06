@@ -1,3 +1,4 @@
+import { TimeStyleService } from './../../services/time-style.service';
 import {
     Component,
     ElementRef,
@@ -37,6 +38,8 @@ import {
     ReactiveFormsModule,
     Validators,
 } from "@angular/forms";
+import { DatePicker } from '@capacitor-community/date-picker';
+import { DarkModeService } from 'src/app/services/dark-mode.service';
 
 @Component({
     selector: "app-nursing-form",
@@ -57,6 +60,7 @@ import {
     <form [formGroup]="form" class="ion-padding">
         <ion-item>
             <ion-label>Nursing Time</ion-label>
+            @if(timeStyleService.timeStyle() === 'number') {
             <ion-input
                 type="tel"
                 inputmode="numeric"
@@ -66,7 +70,16 @@ import {
                 placeholder="HH:mm"
                 maxlength="5"
             ></ion-input>
+            } @else {
+            <ion-button fill="clear" (click)="openDatePicker()">{{form.value.time}}</ion-button>
+            }
         </ion-item>
+        <div class="quick-time-buttons">
+            <ion-button size="small" (click)="setQuickTime(30)">{{getTimeString(30)}}</ion-button>
+            <ion-button size="small" (click)="setQuickTime(20)">{{getTimeString(20)}}</ion-button>
+            <ion-button size="small" (click)="setQuickTime(15)">{{getTimeString(15)}}</ion-button>
+            <ion-button size="small" (click)="setQuickTime(10)">{{getTimeString(10)}}</ion-button>
+        </div>
 
         <ion-segment formControlName="type" class="ion-padding-top">
             <ion-segment-button value="left">
@@ -197,6 +210,15 @@ import {
             --padding-start: 8px;
             --padding-end: 8px;
         }
+        .quick-time-buttons {
+            display: flex;
+            gap: 8px;
+            padding: 8px 16px;
+        }
+        .quick-time-buttons ion-button {
+            flex: 1;
+            font-size: 12px;
+        }
     `],
 })
 export class NursingFormComponent {
@@ -209,6 +231,8 @@ export class NursingFormComponent {
     protected readonly water = water;
 
     babiesList = viewChild(BabiesListComponent);
+    timeStyleService = inject(TimeStyleService);
+    darkModeService = inject(DarkModeService);
     nursing = signal<NursingInput>({
         type: "both",
         amount: "medium",
@@ -219,15 +243,18 @@ export class NursingFormComponent {
     id = signal<string | undefined>(undefined);
     reset() {
         this.babiesList()?.refresh();
+        const defaultTime = new Date();
+        defaultTime.setMinutes(defaultTime.getMinutes() - 5);
+        const roundedTime = this.roundToNearestFiveMinutes(defaultTime);
         this.nursing.set({
             type: "both",
             amount: "medium",
-            time: now(),
+            time: roundedTime,
         });
-        this.time.set(now());
+        this.time.set(roundedTime);
         this.id.set(undefined);
         this.form.patchValue({
-            time: now().toISOString().slice(11, 16),
+            time: roundedTime.toISOString().slice(11, 16),
             type: "both",
             amount: "medium",
             note: "",
@@ -323,7 +350,11 @@ export class NursingFormComponent {
     }
 
     clearTime() {
-        this.form.get("time")?.setValue("", { emitEvent: false });
+        //only remove last 2 characters
+        const time = this.form.get("time")?.value;
+        if (time) {
+            this.form.get("time")?.setValue(time.slice(0, -2), { emitEvent: false });
+        }
     }
 
     form = new FormGroup({
@@ -338,5 +369,45 @@ export class NursingFormComponent {
 
     onNoteChange(event: any) {
         this.form.get("note")?.setValue(event.detail.value);
+    }
+
+    async openDatePicker() {
+        const result = await DatePicker.present({
+            mode: 'time',
+            locale: 'en-GB',
+            is24h: true,
+            theme: this.darkModeService.isDarkMode() ? 'dark' : 'light',
+        });
+        if (result.value) {
+            const value = result.value.substring(11, 16);
+            this.form.get("time")?.setValue(value, { emitEvent: false });
+        }
+    }
+
+    private roundToNearestFiveMinutes(date: Date): Date {
+        const roundedDate = new Date(date);
+        const minutes = roundedDate.getMinutes();
+        const remainder = minutes % 5;
+        if (remainder >= 2.5) {
+            roundedDate.setMinutes(minutes + (5 - remainder));
+        } else {
+            roundedDate.setMinutes(minutes - remainder);
+        }
+        return roundedDate;
+    }
+
+    getTimeString(minutesAgo: number): string {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - minutesAgo);
+        const roundedTime = this.roundToNearestFiveMinutes(now);
+        return `${roundedTime.getHours().toString().padStart(2, "0")}:${roundedTime.getMinutes().toString().padStart(2, "0")}`;
+    }
+
+    setQuickTime(minutesAgo: number) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - minutesAgo);
+        const roundedTime = this.roundToNearestFiveMinutes(now);
+        const timeString = `${roundedTime.getHours().toString().padStart(2, "0")}:${roundedTime.getMinutes().toString().padStart(2, "0")}`;
+        this.form.get("time")?.setValue(timeString, { emitEvent: false });
     }
 }

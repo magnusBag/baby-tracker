@@ -29,8 +29,7 @@ import {
   IonRow,
   IonTitle,
   ViewDidEnter,
-  ViewWillEnter,
-} from "@ionic/angular/standalone";
+  ViewWillEnter} from "@ionic/angular/standalone";
 import { StorageService } from "../services/storage.service";
 import { DiaperInput, NursingInput } from "../components/models";
 import { SleepInput } from "../components/models";
@@ -39,9 +38,8 @@ import {
   arrowBackOutline,
   arrowForwardOutline,
   pencilOutline,
-  trashOutline,
-} from "ionicons/icons";
-import { Router } from "@angular/router";
+  trashOutline, closeOutline, saveOutline } from "ionicons/icons";
+import { ActivatedRoute, Router } from "@angular/router";
 import { addIcons } from "ionicons";
 import { addTimezoneOffset } from "../components/util";
 import { BabyService } from "../services/baby.service";
@@ -55,7 +53,7 @@ import { NursingFormComponent } from "../components/nursing-form/nursing-form.co
   templateUrl: "./history.page.html",
   styleUrls: ["./history.page.scss"],
   standalone: true,
-  imports: [
+  imports: [ 
     IonContent,
     IonTitle,
     CommonModule,
@@ -82,8 +80,14 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
   historyService = inject(HistoryService);
   private alertController = inject(AlertController);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   babyService = inject(BabyService);
-  date = signal(new Date());
+  date = signal(this.makeDate());
+  makeDate() {
+    const d = new Date();
+    d.setHours(12, 0, 0, 0);
+    return d;
+  }
 
   sleeps = signal<SleepInput[]>([]);
   diapers = signal<DiaperInput[]>([]);
@@ -109,6 +113,8 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
   diaperForm = viewChild<DiaperFormComponent>("diaperForm");
   nursingForm = viewChild<NursingFormComponent>("nursingForm");
 
+  didStartOnHistory = signal(false);
+
   @ViewChild("accordionGroup", { static: true })
   accordionGroup!: IonAccordionGroup;
 
@@ -117,13 +123,7 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
   selectedNursing = signal<NursingInput | undefined>(undefined);
 
   constructor() {
-    addIcons({
-      arrowBackOutline,
-      pencilOutline,
-      trashOutline,
-      addOutline,
-      arrowForwardOutline,
-    });
+    addIcons({arrowBackOutline,pencilOutline,trashOutline,addOutline,arrowForwardOutline,closeOutline,saveOutline,});
     effect(() => {
       this.date();
       this.ionViewWillEnter();
@@ -131,8 +131,11 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
   }
 
   async ionViewWillEnter() {
+    const startOnHistory = this.route.snapshot.queryParams["startOnHistory"];
+    if (startOnHistory) {
+      this.didStartOnHistory.set(true);
+    }
     if (this.babyService.activeBaby()) {
-      console.log("active baby", this.babyService.activeBaby());
 
       const history = await this.historyService.getHistoryForBaby(
         this.babyService.activeBaby()!.id,
@@ -141,7 +144,6 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
       this.sleeps.set(history.sleeps || []);
       this.diapers.set(history.diapers || []);
       this.nursings.set(history.nursings || []);
-      console.log(history);
       const values = [];
       if (this.sleeps() && this.sleeps().length > 0) {
         values.push("sleep");
@@ -154,6 +156,7 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
       }
       this.accordionGroup.value = values;
     }
+    
   }
 
   async showDeleteDiaperAlert(diaper: DiaperInput) {
@@ -408,5 +411,9 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
     setTimeout(() => {
       event.target.complete();
     }, 500);
+  }
+
+  closeModal(modal: IonModal) {
+    modal.dismiss();
   }
 }

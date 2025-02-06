@@ -21,6 +21,10 @@ import {
   IonToggle,
   IonToolbar,
   ViewWillEnter,
+  IonSegmentButton,
+  IonSegment,
+  IonAccordionGroup,
+  IonAccordion
 } from "@ionic/angular/standalone";
 import { Baby } from "../components/models";
 import {
@@ -38,6 +42,7 @@ import {
 } from "ionicons/icons";
 import { addIcons } from "ionicons";
 import { BubbleNotificationPlugin } from "bubble-notification-plugin";
+import { TimeStyleService } from "../services/time-style.service";
 
 @Component({
   selector: "app-settings",
@@ -45,6 +50,8 @@ import { BubbleNotificationPlugin } from "bubble-notification-plugin";
   styleUrls: ["./settings.page.scss"],
   standalone: true,
   imports: [
+    IonSegment,
+    IonSegmentButton,
     IonItem,
     IonContent,
     IonTitle,
@@ -56,12 +63,14 @@ import { BubbleNotificationPlugin } from "bubble-notification-plugin";
     IonButtons,
     IonList,
     IonItem,
-    IonToggle,
+    IonAccordionGroup,
+    IonAccordion
   ],
 })
 export class SettingsPage implements ViewWillEnter {
   babyService = inject(BabyService);
   darkModeService = inject(DarkModeService);
+  timeStyleService = inject(TimeStyleService);
   activeBaby = signal<Baby | null>(null);
   alertController = inject(AlertController);
   router = inject(Router);
@@ -167,12 +176,11 @@ export class SettingsPage implements ViewWillEnter {
   }
 
   async toggleStartOnHistory(event: any) {
-    const isChecked = event.detail.checked;
     await Preferences.set({
       key: "startOnHistory",
-      value: isChecked.toString(),
+      value: event.detail.value.toString(),
     });
-    this.startOnHistory.set(isChecked);
+    this.startOnHistory.set(event.detail.value);
   }
 
   async showBubbleNotification() {
@@ -184,5 +192,9 @@ export class SettingsPage implements ViewWillEnter {
       content:
         `Track ${babyName}'s activities - tap to quickly add new entries!`,
     });
+  }
+  toggleTimeStyle(event: any) {
+    const isChecked = event.detail.value;
+    this.timeStyleService.timeStyle.set(isChecked);
   }
 }

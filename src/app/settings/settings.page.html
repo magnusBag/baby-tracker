@@ -8,6 +8,7 @@
     <ion-title size="large">Settings</ion-title>
   </div>
   <div class="active-baby-wrapper ion-padding">
+    <ion-title class="ion-padding-top">Baby settings</ion-title>
     @for (baby of babyService.babies(); track baby.id) {
     <ion-list>
       <ion-item>
@@ -33,7 +34,7 @@
       </ion-item>
     </ion-list>
     }
-    <div class="flex">
+    <div class="flex ion-padding-top ion-padding-bottom">
       <ion-button expand="block" (click)="openBabyAlert()">
         <ion-icon name="add"></ion-icon>
         <ion-text>add baby</ion-text>
@@ -44,17 +45,43 @@
         <ion-text>add baby by id</ion-text>
       </ion-button>
     </div>
-    <ion-item class="ion-padding-top ion-padding-bottom" inset>
-      <ion-text>Start app on history page</ion-text>
-      <ion-toggle
-        slot="end"
-        [checked]="startOnHistory()"
-        (ionChange)="toggleStartOnHistory($event)"
-      >
-      </ion-toggle>
-    </ion-item>
-    <ion-button class="ion-padding-top" (click)="showBubbleNotification()">
-      <ion-text>Show bubble notification</ion-text>
-    </ion-button>
+    <ion-accordion-group>
+      <ion-accordion value="general">
+        <ion-item slot="header">
+          <ion-title>General settings</ion-title>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <ion-text class="ion-padding-top">Start app on history page</ion-text>
+          <ion-segment
+            [value]="startOnHistory()"
+            (ionChange)="toggleStartOnHistory($event)"
+            class="ion-padding-bottom"
+          >
+            <ion-segment-button [value]="true">
+              <ion-text>Yes</ion-text>
+            </ion-segment-button>
+            <ion-segment-button [value]="false">
+              <ion-text>No</ion-text>
+            </ion-segment-button>
+          </ion-segment>
+          <ion-text class="ion-padding-top">Time style</ion-text>
+          <ion-segment
+            [value]="timeStyleService.timeStyle()"
+            (ionChange)="toggleTimeStyle($event)"
+            class="ion-padding-bottom"
+          >
+            <ion-segment-button value="number">
+              <ion-text>Number</ion-text>
+            </ion-segment-button>
+            <ion-segment-button value="native">
+              <ion-text>Wheel</ion-text>
+            </ion-segment-button>
+          </ion-segment>
+          <ion-button (click)="showBubbleNotification()">
+            <ion-text>Show bubble notification</ion-text>
+          </ion-button>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
   </div>
 </ion-content>

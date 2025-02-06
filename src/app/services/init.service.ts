@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { AuthService } from "./auth.service";
 import { BabyService } from "./baby.service";
-import { Device } from "@capacitor/device";
+import { Preferences } from "@capacitor/preferences";
+import { Router } from "@angular/router";
 
 @Injectable({
     providedIn: "root",
@@ -10,6 +11,7 @@ export class InitService {
     constructor(
         private authService: AuthService,
         private babyService: BabyService,
+        private router: Router,
     ) {}
 
     async initialize() {
@@ -18,13 +20,17 @@ export class InitService {
         if (!isAuthenticated) {
             return;
         }
+        const startOnHistory = await Preferences.get({ key: "startOnHistory" });
+        if (startOnHistory.value === "true") {
+            this.router.navigate(["/history"], { queryParams: { startOnHistory: true } });
+        }
 
         // Then check if we have a baby
         await this.babyService.refresh();
         if (!this.babyService.activeBaby()) {
-            const deviceId = await Device.getId();
-            const babyName = `Baby ${deviceId.identifier.slice(0, 4)}`;
+            const babyName = `First baby`;
             await this.babyService.makeBaby(babyName);
         }
+
     }
 }

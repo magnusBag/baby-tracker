@@ -61,14 +61,55 @@ func getDailyReport(c *gin.Context, babyID string, date time.Time) {
 		return
 	}
 
-	report := DailyReport{
-		Date:     startOfDay,
-		Diapers:  diapers,
-		Nursings: nursings,
-		Sleeps:   sleeps,
+	// Convert to response format with notes included
+	sleepResponse := make([]gin.H, len(sleeps))
+	for i, sleep := range sleeps {
+		sleepResponse[i] = gin.H{
+			"id":     sleep.ID,
+			"start":  sleep.Start.Format(time.RFC3339),
+			"end":    sleep.End.Format(time.RFC3339),
+			"babyId": sleep.BabyID,
+			"note":   sleep.Note,
+		}
 	}
 
-	c.JSON(http.StatusOK, report)
+	diaperResponse := make([]gin.H, len(diapers))
+	for i, diaper := range diapers {
+		diaperResponse[i] = gin.H{
+			"id":     diaper.ID,
+			"type":   diaper.Type,
+			"time":   diaper.Time.Format(time.RFC3339),
+			"babyId": diaper.BabyID,
+			"note":   diaper.Note,
+		}
+	}
+
+	nursingResponse := make([]gin.H, len(nursings))
+	for i, nursing := range nursings {
+		nursingResponse[i] = gin.H{
+			"id":     nursing.ID,
+			"type":   nursing.Type,
+			"amount": nursing.Amount,
+			"time":   nursing.Time.Format(time.RFC3339),
+			"babyId": nursing.BabyID,
+			"note":   nursing.Note,
+		}
+	}
+
+	// Calculate total hours slept
+	var totalHoursSlept float64
+	for _, sleep := range sleeps {
+		totalHoursSlept += sleep.End.Sub(sleep.Start).Hours()
+	}
+
+	// Send response directly
+	c.JSON(http.StatusOK, gin.H{
+		"date":            startOfDay,
+		"diapers":         diaperResponse,
+		"nursings":        nursingResponse,
+		"sleeps":          sleepResponse,
+		"totalHoursSlept": totalHoursSlept,
+	})
 }
 
 func getWeeklyReport(c *gin.Context, babyID string, endDate time.Time) {
