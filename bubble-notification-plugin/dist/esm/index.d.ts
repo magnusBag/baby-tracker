@@ -6,6 +6,8 @@ export interface BubbleNotificationPluginPlugin {
         success: boolean;
     }>;
     hide(): Promise<void>;
+    checkPermission(): Promise<{ granted: boolean }>;
+    requestPermission(): Promise<{ granted: boolean }>;
 }
 declare const BubbleNotificationPlugin: BubbleNotificationPluginPlugin;
 export { BubbleNotificationPlugin };

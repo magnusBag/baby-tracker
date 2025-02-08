@@ -3,7 +3,7 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "personal.babytracker",
+      "package_name": "io.babytracker.app",
       "sha256_cert_fingerprints": [
         "37:38:B1:5D:88:9B:A5:23:DF:F2:94:19:2C:E4:37:A5:BD:80:AD:E5:C2:9C:9D:F1:BD:BA:71:DD:C8:F1:CA:9B"
       ]

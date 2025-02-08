@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "personal.babytracker",
+  appId: "io.babytracker.app",
   appName: "baby-tracker",
   webDir: "www/browser",
   plugins: {
@@ -9,11 +9,11 @@ const config: CapacitorConfig = {
       url: "babytracker",
       appLinks: {
         ios: {
-          appId: "personal.babytracker",
+          appId: "io.babytracker.app",
           appName: "Baby Tracker",
         },
         android: {
-          packageName: "personal.babytracker",
+          packageName: "io.babytracker.app",
           scheme: "babytracker",
         },
       },
@@ -25,7 +25,11 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "always",
   },
-  android: {},
-};
+  android: {
+    buildOptions: {
+      keystorePath: "/Users/mba/Downloads/play-upload-key.jks",
+    },
+  },
+  };
 
 export default config;

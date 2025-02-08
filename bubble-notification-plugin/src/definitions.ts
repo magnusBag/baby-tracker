@@ -3,4 +3,6 @@ export interface BubbleNotificationPluginPlugin {
         options: { title: string; content: string },
     ): Promise<void>;
     hide(): Promise<void>;
+    checkPermission(): Promise<{ granted: boolean }>;
+    requestPermission(): Promise<{ granted: boolean }>;
 }

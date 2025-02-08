@@ -27,6 +27,14 @@ export class BubbleNotificationPluginWeb extends WebPlugin
     // Web implementation doesn't support hiding notifications
     return;
   }
+
+  async checkPermission(): Promise<{ granted: boolean }> {
+    return { granted: true };
+  }
+
+  async requestPermission(): Promise<{ granted: boolean }> {
+    return { granted: true };
+  }
 }
 
 const BubbleNotificationPlugin = new BubbleNotificationPluginWeb();

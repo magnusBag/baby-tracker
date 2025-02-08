@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.your.app.plugins;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -15,8 +15,8 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
-import personal.babytracker.plugins.BubbleActivity;
-import io.ionic.starter.R;
+import io.babytracker.app.plugins.BubbleActivity;
+import io.babytracker.app.plugins.R;
 
 @CapacitorPlugin(name = "BubbleNotifications")
 public class BubbleNotificationsPlugin extends Plugin {
@@ -49,13 +49,13 @@ public class BubbleNotificationsPlugin extends Plugin {
                     .setDesiredHeight(600)
                     .setAutoExpandBubble(true)
                     .setIntent(createBubblePendingIntent())
-                    .setIcon(Icon.createWithResource(getContext(), R.drawable.ic_bubble))
+                    .setIcon(Icon.createWithResource(getContext(), io.babytracker.app.plugins.R.drawable.ic_bubble))
                     .build();
 
             // Create notification
             Notification.Builder builder = new Notification.Builder(getContext(), CHANNEL_ID)
                     .setBubbleMetadata(bubbleMetadata)
-                    .setSmallIcon(R.drawable.ic_notification)
+                    .setSmallIcon(io.babytracker.app.plugins.R.drawable.ic_notification)
                     .setContentTitle(title)
                     .setContentText(content)
                     .setCategory(Notification.CATEGORY_MESSAGE);

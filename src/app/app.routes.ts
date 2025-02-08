@@ -46,4 +46,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import("./register/register.page").then((m) => m.RegisterPage),
   },
+  {
+    path: "timeline",
+    loadComponent: () =>
+      import("./timeline/timeline.page").then((m) => m.TimelinePage),
+  },
 ];

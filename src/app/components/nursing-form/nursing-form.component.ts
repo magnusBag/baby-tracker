@@ -244,7 +244,8 @@ export class NursingFormComponent {
     reset() {
         this.babiesList()?.refresh();
         const defaultTime = new Date();
-        defaultTime.setMinutes(defaultTime.getMinutes() - 5);
+        //offset with timezone
+        defaultTime.setMinutes(defaultTime.getMinutes() - defaultTime.getTimezoneOffset());
         const roundedTime = this.roundToNearestFiveMinutes(defaultTime);
         this.nursing.set({
             type: "both",

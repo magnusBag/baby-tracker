@@ -1,0 +1,224 @@
+<ion-content [fullscreen]="true" id="timeline-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (!isHomePage()) {
+  <ion-row>
+    <ion-button fill="clear" (click)="goToHome()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-button>
+    <ion-title
+      >{{ babyService.activeBaby()?.name }} - {{ date() | date : 'dd/MM/yy'
+      }}</ion-title
+    >
+  </ion-row>
+  }
+
+  <div class="summary-boxes">
+    <div
+      class="summary-box"
+      [class.active]="filterToggle() === 'diaper'"
+      (click)="toggleFilter('diaper')"
+    >
+      <img
+        [src]="darkModeService.isDarkMode() || filterToggle() === 'diaper' ? 'assets/diaper-dark.svg' : 'assets/diaper.svg'"
+        alt="diaper"
+        style="width: 20px; height: 20px"
+      />
+      <div class="summary-content">
+        <div class="summary-value">{{ totalDiapers() }}</div>
+        <div class="summary-label">Diapers</div>
+      </div>
+    </div>
+
+    <div
+      class="summary-box"
+      [class.active]="filterToggle() === 'sleep'"
+      (click)="toggleFilter('sleep')"
+    >
+      <img
+        [src]="darkModeService.isDarkMode() || filterToggle() === 'sleep' ? 'assets/sleep-dark.svg' : 'assets/sleep.svg'"
+        alt="sleep"
+        style="width: 20px; height: 20px"
+      />
+      <div class="summary-content">
+        <div class="summary-value">
+          {{ totalSleepDuration() | number:'1.1-1' }}h
+        </div>
+        <div class="summary-label">Sleep</div>
+      </div>
+    </div>
+
+    <div
+      class="summary-box"
+      [class.active]="filterToggle() === 'nursing'"
+      (click)="toggleFilter('nursing')"
+    >
+      <img
+        [src]="darkModeService.isDarkMode() || filterToggle() === 'nursing' ? 'assets/nursing-dark.svg' : 'assets/nursing.svg'"
+        alt="nursing"
+        style="width: 20px; height: 20px"
+      />
+      <div class="summary-content">
+        <div class="summary-value">{{ totalNursings() }}</div>
+        <div class="summary-label">Nursings</div>
+      </div>
+    </div>
+  </div>
+
+  <ion-list class="ion-padding">
+    <ion-item
+      *ngFor="let item of timelineItems()"
+      class="ion-activatable"
+      [class.filtered-out]="filterToggle() && item.type !== filterToggle()"
+      style="
+        animation: fadeIn 0.5s ease-in-out;
+        animation-fill-mode: forwards;
+        --border-style: none;
+      "
+    >
+      <ion-ripple-effect></ion-ripple-effect>
+      <img
+        [src]="darkModeService.isDarkMode() ? 
+          item.type === 'sleep' ? 'assets/sleep-dark.svg' : 
+          item.type === 'diaper' ? 'assets/diaper-dark.svg' : 
+          'assets/nursing-dark.svg' :
+          item.type === 'sleep' ? 'assets/sleep.svg' : 
+          item.type === 'diaper' ? 'assets/diaper.svg' : 
+          'assets/nursing.svg'"
+        [alt]="item.type"
+        style="width: 24px; height: 24px; margin-right: 12px"
+      />
+      @if (!isOngoingSleep(item)) {
+      <ion-label (click)="editItem(item)">
+        {{ getItemTime(item) }} - {{ getItemDescription(item) }}
+        <div *ngIf="item.data.note" class="note-text">
+          Note: {{ item.data.note }}
+        </div>
+      </ion-label>
+      } @else {
+      <ion-label
+        >Began sleeping at {{ getItemTime(item).substring(0, 5) }}
+      </ion-label>
+      }
+      <ion-button
+        *ngIf="isOngoingSleep(item)"
+        fill="clear"
+        size="small"
+        slot="end"
+        (click)="quickEndSleep(item, $event)"
+      >
+        End Now
+      </ion-button>
+      <ion-button
+        fill="clear"
+        slot="end"
+        color="danger"
+        (click)="deleteItem(item)"
+      >
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <div class="add-buttons">
+    <ion-button fill="clear" (click)="addNewSleep()">
+      <img
+        [src]="darkModeService.isDarkMode() ? 'assets/sleep-dark.svg' : 'assets/sleep.svg'"
+        alt="sleep"
+        style="width: 24px; height: 24px; margin-right: 8px"
+      />
+      Add Sleep
+    </ion-button>
+    <ion-button fill="clear" (click)="addNewDiaper()">
+      <img
+        [src]="darkModeService.isDarkMode() ? 'assets/diaper-dark.svg' : 'assets/diaper.svg'"
+        alt="diaper"
+        style="width: 24px; height: 24px; margin-right: 8px"
+      />
+      Add Diaper
+    </ion-button>
+    <ion-button fill="clear" (click)="addNewNursing()">
+      <img
+        [src]="darkModeService.isDarkMode() ? 'assets/nursing-dark.svg' : 'assets/nursing.svg'"
+        alt="nursing"
+        style="width: 24px; height: 24px; margin-right: 8px"
+      />
+      Add Nursing
+    </ion-button>
+  </div>
+
+  @if (!isHomePage()) {
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      bottom: 0;
+      left: 5px;
+      width: 100%;
+    "
+  >
+    <ion-button fill="clear" expand="block" (click)="previousDay()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-button>
+    <ion-button fill="clear" expand="block" (click)="nextDay()">
+      <ion-icon name="arrow-forward-outline"></ion-icon>
+    </ion-button>
+  </div>
+  }
+
+  <!-- Edit Modals -->
+  <ion-modal
+    #sleepModal
+    [breakpoints]="[0, 0.75, 1]"
+    [initialBreakpoint]="0.75"
+    [keepContentsMounted]="true"
+    (willDismiss)="sleepForm.reset()"
+  >
+    <ng-template>
+      <ion-content class="ion-padding">
+        <app-sleep-form
+          #sleepForm
+          (sleepOutput)="onSleepEdit($event)"
+        ></app-sleep-form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    #diaperModal
+    [breakpoints]="[0, 0.75, 1]"
+    [initialBreakpoint]="0.75"
+    [keepContentsMounted]="true"
+    (willDismiss)="diaperForm.reset()"
+  >
+    <ng-template>
+      <ion-content class="ion-padding">
+        <app-diaper-form
+          #diaperForm
+          (diaperOutput)="onDiaperEdit($event)"
+        ></app-diaper-form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    #nursingModal
+    [breakpoints]="[0, 0.5, 0.75, 1]"
+    [initialBreakpoint]="0.75"
+    [keepContentsMounted]="true"
+    (willDismiss)="nursingForm.reset()"
+  >
+    <ng-template>
+      <ion-content class="ion-padding">
+        <app-nursing-form
+          #nursingForm
+          (nursingOutput)="onNursingEdit($event)"
+        ></app-nursing-form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

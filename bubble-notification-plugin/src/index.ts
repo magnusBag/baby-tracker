@@ -5,6 +5,8 @@ export interface BubbleNotificationPluginPlugin {
         options: { title?: string; content?: string },
     ): Promise<{ success: boolean }>;
     hide(): Promise<void>;
+    checkPermission(): Promise<{ granted: boolean }>;
+    requestPermission(): Promise<{ granted: boolean }>;
 }
 
 const BubbleNotificationPlugin = registerPlugin<BubbleNotificationPluginPlugin>(

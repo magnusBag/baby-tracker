@@ -53,15 +53,18 @@
         <div class="ion-padding" slot="content">
           <ion-text class="ion-padding-top">Start app on history page</ion-text>
           <ion-segment
-            [value]="startOnHistory()"
-            (ionChange)="toggleStartOnHistory($event)"
+            [value]="initService.startPage()"
+            (ionChange)="setStartPage($event)"
             class="ion-padding-bottom"
           >
-            <ion-segment-button [value]="true">
-              <ion-text>Yes</ion-text>
+            <ion-segment-button value="home">
+              <ion-text>Home</ion-text>
             </ion-segment-button>
-            <ion-segment-button [value]="false">
-              <ion-text>No</ion-text>
+            <ion-segment-button value="history">
+              <ion-text>History</ion-text>
+            </ion-segment-button>
+            <ion-segment-button value="timeline">
+              <ion-text>Timeline</ion-text>
             </ion-segment-button>
           </ion-segment>
           <ion-text class="ion-padding-top">Time style</ion-text>

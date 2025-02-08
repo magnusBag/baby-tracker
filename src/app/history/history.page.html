@@ -26,16 +26,29 @@
           <ion-item *ngFor="let sleep of sleeps()" class="ion-activatable">
             <ion-ripple-effect></ion-ripple-effect>
             <ion-label (click)="editSleep(sleep)">
-              {{ sleep.start | date : 'HH:mm' }} - {{ sleep.end | date : 'HH:mm'
-              }} - ({{ calculateDurationInHours(sleep.start, sleep.end) | number
-              : '1.0-2' }} hours)
+              @if (!isOngoingSleep(sleep)) { {{ sleep.start | date : 'HH:mm' }}
+              - {{ sleep.end | date : 'HH:mm' }} - ({{
+              calculateDurationInHours(sleep.start, sleep.end) | number :
+              '1.0-2' }} hours) } @else { Began sleeping at {{ sleep.start |
+              date : 'HH:mm' }} }
               <div *ngIf="sleep.note" class="note-text">
                 Note: {{ sleep.note }}
               </div>
             </ion-label>
+            @if (isOngoingSleep(sleep)) {
+            <ion-button
+              fill="clear"
+              size="small"
+              slot="end"
+              (click)="quickEndSleep(sleep, $event)"
+            >
+              End Now
+            </ion-button>
+            } @if (!isOngoingSleep(sleep)) {
             <ion-button fill="clear" slot="end" (click)="editSleep(sleep)">
               <ion-icon name="pencil-outline"></ion-icon>
             </ion-button>
+            }
             <ion-button
               fill="clear"
               slot="end"
@@ -89,7 +102,7 @@
         </ion-list>
       </ion-accordion>
 
-      <ion-accordion [value]="'nursings'">
+      <ion-accordion [value]="'nursings'" style="margin-bottom: 100px">
         <ion-item slot="header">
           <ion-label>Nursings: {{ nursings().length }}</ion-label>
         </ion-item>

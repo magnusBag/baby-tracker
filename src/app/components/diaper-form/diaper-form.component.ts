@@ -138,7 +138,8 @@ export class DiaperFormComponent {
     this.form.reset();
     this.form.patchValue({ type: "both" });
     const defaultTime = new Date();
-    defaultTime.setMinutes(defaultTime.getMinutes() - 5);
+    //offset with timezone
+    defaultTime.setMinutes(defaultTime.getMinutes() - defaultTime.getTimezoneOffset());
     const roundedTime = this.roundToNearestFiveMinutes(defaultTime);
     this.time.set(roundedTime);
     this.note.set(undefined);

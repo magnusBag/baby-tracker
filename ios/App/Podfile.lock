@@ -5,6 +5,8 @@ PODS:
     - CapacitorCordova
   - CapacitorApp (6.0.0):
     - Capacitor
+  - CapacitorCommunityDatePicker (6.0.0):
+    - Capacitor
   - CapacitorCordova (6.0.0)
   - CapacitorDevice (6.0.0):
     - Capacitor
@@ -23,6 +25,7 @@ DEPENDENCIES:
   - BubbleNotificationPlugin (from `../../bubble-notification-plugin`)
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorCommunityDatePicker (from `../../node_modules/@capacitor-community/date-picker`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
   - CapacitorEmailComposer (from `../../node_modules/capacitor-email-composer`)
@@ -38,6 +41,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
     :path: "../../node_modules/@capacitor/app"
+  CapacitorCommunityDatePicker:
+    :path: "../../node_modules/@capacitor-community/date-picker"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
@@ -57,6 +62,7 @@ SPEC CHECKSUMS:
   BubbleNotificationPlugin: cd944545db2f60f5835203077ceaabc5ab9d7214
   Capacitor: 559d073c4ca6c27f8e7002c807eea94c3ba435a9
   CapacitorApp: 9d53aec7101f7b030a950c5bdc4df8612576b279
+  CapacitorCommunityDatePicker: 5efdc3f4952f747b7e976f4d1c468e1c2148f924
   CapacitorCordova: 8c4bfdf69368512e85b1d8b724dd7546abeb30af
   CapacitorDevice: f8fd88f9edd1261c55a109f32015b09bbbfdc4a0
   CapacitorEmailComposer: 3c98c8cee452377cb5706cc8c59560ca70590009
@@ -65,6 +71,6 @@ SPEC CHECKSUMS:
   CapacitorPreferences: c9b839a80baa72e4ed4bdb117618e1950d3046b5
   CapacitorStatusBar: 2e4369f99166125435641b1908d05f561eaba6f6
 
-PODFILE CHECKSUM: 3e5477182c923792dc93d61f57159e76a91b7494
+PODFILE CHECKSUM: 2e96c44cbadad444884a820805dc3044085ce48c
 
 COCOAPODS: 1.16.2

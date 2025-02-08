@@ -221,6 +221,9 @@ export class SleepFormComponent {
   }
 
   async reset() {
+    // Clear the id first to ensure we're creating a new entry
+    this.id.set(undefined);
+    
     this.babiesList()?.refresh();
     const lastTimer = await this.storageService.getLastTimer();
     let lastTimerDate = lastTimer.value
@@ -244,9 +247,11 @@ export class SleepFormComponent {
 
     this.sleepStart.set(lastTimerDate);
     this.sleepEnd.set(roundedEndTime);
-    this.id.set(undefined);
     this.originalStartTime.set(lastTimerDate);
     this.originalEndTime.set(roundedEndTime);
+    
+    // Reset form and set new values
+    this.form.reset();
     this.form.patchValue({
       startTime: lastTimerDate.toISOString().slice(11, 16),
       endTime: roundedEndTime.toISOString().slice(11, 16),
@@ -308,7 +313,6 @@ export class SleepFormComponent {
       const now = new Date();
       now.setMinutes(now.getMinutes() - minutes);
       const roundedTime = this.roundToNearestFiveMinutes(now);
-      roundedTime.setMinutes(roundedTime.getMinutes() - roundedTime.getTimezoneOffset());
       const timeString = `${roundedTime.getHours().toString().padStart(2, "0")}:${roundedTime.getMinutes().toString().padStart(2, "0")}`;
       this.form.get(control)?.setValue(timeString, { emitEvent: false });
 
@@ -326,7 +330,6 @@ export class SleepFormComponent {
     const now = new Date();
     now.setMinutes(now.getMinutes() - minutesAgo);
     const roundedTime = this.roundToNearestFiveMinutes(now);
-    roundedTime.setMinutes(roundedTime.getMinutes() - roundedTime.getTimezoneOffset());
     return `${roundedTime.getHours().toString().padStart(2, "0")}:${roundedTime.getMinutes().toString().padStart(2, "0")}`;
   }
 }

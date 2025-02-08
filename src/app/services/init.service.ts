@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { effect, Injectable, OnInit, signal } from "@angular/core";
 import { AuthService } from "./auth.service";
 import { BabyService } from "./baby.service";
 import { Preferences } from "@capacitor/preferences";
@@ -8,11 +8,20 @@ import { Router } from "@angular/router";
     providedIn: "root",
 })
 export class InitService {
+    startPage = signal<string | undefined>(undefined);
     constructor(
         private authService: AuthService,
         private babyService: BabyService,
         private router: Router,
-    ) {}
+    ) {
+        effect(() => {
+            const startPage = this.startPage();
+            if (startPage) {
+                Preferences.set({ key: "startPage", value: startPage });
+            }
+        });
+    }
+    
 
     async initialize() {
         // First check authentication
@@ -20,11 +29,18 @@ export class InitService {
         if (!isAuthenticated) {
             return;
         }
-        const startOnHistory = await Preferences.get({ key: "startOnHistory" });
-        if (startOnHistory.value === "true") {
-            this.router.navigate(["/history"], { queryParams: { startOnHistory: true } });
+        const startPage = await Preferences.get({ key: "startPage" });
+        
+        switch (startPage.value) {
+            case "timeline":
+                this.router.navigate(["/timeline"], { queryParams: { isHomePage: true } });
+                break;
+            case "history":
+                this.router.navigate(["/history"], { queryParams: { startOnHistory: true } });
+                break;
+            default:
+                break;
         }
-
         // Then check if we have a baby
         await this.babyService.refresh();
         if (!this.babyService.activeBaby()) {

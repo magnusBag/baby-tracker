@@ -1,0 +1,130 @@
+.summary-boxes {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  padding-bottom: 0px;
+
+  .summary-box {
+    transition: background 0.2s ease-out;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--ion-color-light);
+    border-radius: 8px;
+
+    .summary-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .summary-value {
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+
+      .summary-label {
+        font-size: 0.8em;
+      }
+    }
+    &.active {
+      background: var(--ion-color-primary);
+  
+      .summary-value {
+        color: #E0E1DD;
+      }
+      
+      .summary-label {
+        color: #E0E1DD;
+      }
+      
+    }
+  }
+
+}
+
+.note-text {
+  font-size: 0.8em;
+  color: var(--ion-color-medium);
+  margin-top: 4px;
+}
+
+ion-content {
+  &.animate-page {
+    transition: transform 0.25s ease-out;
+  }
+
+  &.slide-left {
+    transform: translateX(-100%);
+  }
+
+  &.slide-right {
+    transform: translateX(100%);
+  }
+}
+
+ion-list {
+  transition: height 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  height: auto;
+  
+  &:empty {
+    height: 0;
+  }
+}
+
+ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  margin: 8px 0 0 0;
+  border-radius: 8px;
+  --background: var(--ion-color-light);
+  
+  // Add animations
+  max-height: 100px;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0.0, 0.2, 1),
+              padding 0.3s cubic-bezier(0.4, 0.0, 0.2, 1),
+              margin 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+  &.filtered-out {
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border: 0;
+    pointer-events: none;
+  }
+}
+
+.add-buttons {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  margin-bottom: 60px;
+
+  ion-button {
+    width: 100%;
+    height: 48px;
+    --color: var(--ion-color-contrast);
+    --border-radius: 8px;
+    --background: var(--ion-color-light);
+    
+    &::part(native) {
+      justify-content: flex-start;
+      padding-left: 16px;
+    }
+  }
+} 
+
+.footer {
+  position: fixed;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  ion-icon {
+    padding: 0.5rem;
+    font-size: 40px;
+  }
+}

@@ -43,6 +43,7 @@ import {
 import { addIcons } from "ionicons";
 import { BubbleNotificationPlugin } from "bubble-notification-plugin";
 import { TimeStyleService } from "../services/time-style.service";
+import { InitService } from "../services/init.service";
 
 @Component({
   selector: "app-settings",
@@ -71,6 +72,7 @@ export class SettingsPage implements ViewWillEnter {
   babyService = inject(BabyService);
   darkModeService = inject(DarkModeService);
   timeStyleService = inject(TimeStyleService);
+  initService = inject(InitService);
   activeBaby = signal<Baby | null>(null);
   alertController = inject(AlertController);
   router = inject(Router);
@@ -183,7 +185,16 @@ export class SettingsPage implements ViewWillEnter {
     this.startOnHistory.set(event.detail.value);
   }
 
+  setStartPage(event: any) {
+    console.log("setStartPage", event);
+    this.initService.startPage.set(event.detail.value);
+  }
+
   async showBubbleNotification() {
+    const permission = await BubbleNotificationPlugin.checkPermission();
+    if (!permission.granted) {
+      await BubbleNotificationPlugin.requestPermission();
+    }
     await this.babyService.getActiveBaby();
     const babyName = this.babyService.activeBaby()?.name || "your baby";
 

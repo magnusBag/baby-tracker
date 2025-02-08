@@ -1,4 +1,4 @@
-package personal.babytracker.plugins;
+package io.babytracker.app.plugins;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -21,6 +21,12 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.util.Collections;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.content.ContextCompat;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.activity.result.ActivityResultLauncher;
+
 @CapacitorPlugin(name = "BubbleNotificationPlugin")
 public class BubbleNotificationPluginPlugin extends Plugin {
 
@@ -29,10 +35,18 @@ public class BubbleNotificationPluginPlugin extends Plugin {
     private static final String TAG = "BubbleNotificationPlugin";
     private static final String SHORTCUT_ID = "bubble_shortcut";
 
+    private ActivityResultLauncher<String> requestPermissionLauncher;
+
     @Override
     public void load() {
         super.load();
         createNotificationChannel();
+        requestPermissionLauncher = getActivity().registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+                // Handle permission result if needed
+            }
+        );
     }
 
     private void createNotificationChannel() {
@@ -103,7 +117,7 @@ public class BubbleNotificationPluginPlugin extends Plugin {
             // Create bubble metadata
             Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder(
                     bubbleIntent,
-                    Icon.createWithResource(getContext(), R.drawable.ic_bubble)
+                    Icon.createWithResource(getContext(), io.babytracker.app.plugins.R.drawable.ic_bubble)
             )
                     .setDesiredHeight(600)
                     .setAutoExpandBubble(true)
@@ -123,7 +137,7 @@ public class BubbleNotificationPluginPlugin extends Plugin {
 
             // Build the notification
             Notification notification = new Notification.Builder(getContext(), CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_notification)
+                    .setSmallIcon(io.babytracker.app.plugins.R.drawable.ic_notification)
                     .setStyle(messagingStyle)
                     .setBubbleMetadata(bubbleMetadata)
                     .setShortcutId("bubble_shortcut")
@@ -168,4 +182,27 @@ public class BubbleNotificationPluginPlugin extends Plugin {
             call.reject("Failed to hide notification: " + e.getMessage());
         }
     }
+
+    @PluginMethod
+    public void checkPermission(PluginCall call) {
+        boolean granted = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+        JSObject ret = new JSObject();
+        ret.put("granted", granted);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void requestPermission(PluginCall call) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            JSObject ret = new JSObject();
+            ret.put("granted", true);
+            call.resolve(ret);
+        } else {
+            JSObject ret = new JSObject();
+            ret.put("granted", true);
+            call.resolve(ret);
+        }
+    }
+
 }

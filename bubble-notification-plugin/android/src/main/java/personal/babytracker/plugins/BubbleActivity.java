@@ -1,4 +1,4 @@
-package personal.babytracker.plugins;
+package io.babytracker.app.plugins;
 
 import android.os.Bundle;
 import android.content.Intent;

@@ -59,7 +59,6 @@ func main() {
 	r.GET("/baby/:id", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "baby.html", nil)
 	})
-
 	// Share route
 	r.GET("/share/:token", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "baby.html", nil)

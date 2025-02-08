@@ -300,6 +300,38 @@ export class HistoryPage implements ViewWillEnter, ViewDidEnter {
     return Math.floor(duration / 60000) / 60;
   }
 
+  isOngoingSleep(sleep: SleepInput): boolean {
+    const start = new Date(sleep.start);
+    const end = new Date(sleep.end);
+    const diff = end.getTime() - start.getTime();
+    return diff < 60000;
+  }
+
+  roundToNearestFiveMinutes(date: Date): Date {
+    const minutes = date.getMinutes();
+    const remainder = minutes % 5;
+    const roundedMinutes = remainder >= 2.5 ? minutes + (5 - remainder) : minutes - remainder;
+    const newDate = new Date(date);
+    newDate.setMinutes(roundedMinutes);
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
+    return newDate;
+  }
+
+  async quickEndSleep(sleep: SleepInput, event: Event) {
+    event.stopPropagation(); // Prevent opening the edit modal
+    
+    const endTime = this.roundToNearestFiveMinutes(new Date());
+    
+    const updatedSleep: SleepInput = {
+      ...sleep,
+      end: endTime
+    };
+    
+    await this.storageService.editSleep(updatedSleep);
+    await this.ionViewWillEnter();
+  }
+
   editSleep(sleep: SleepInput) {
     this.selectedSleep.set(sleep);
     this.sleepForm()!.initializeForm(sleep);
